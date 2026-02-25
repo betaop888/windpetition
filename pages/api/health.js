@@ -8,6 +8,9 @@ const handler = function handler(req, res) {
       hasDiscordClientId: Boolean(process.env.DISCORD_CLIENT_ID),
       hasDiscordClientSecret: Boolean(process.env.DISCORD_CLIENT_SECRET),
       hasDiscordRedirectUri: Boolean(process.env.DISCORD_REDIRECT_URI),
+      hasPostgresUrl: Boolean(process.env.POSTGRES_URL),
+      hasPostgresPrismaUrl: Boolean(process.env.POSTGRES_PRISMA_URL),
+      hasPostgresNonPoolingUrl: Boolean(process.env.POSTGRES_URL_NON_POOLING),
       nodeEnv: process.env.NODE_ENV || null,
     }),
   );
