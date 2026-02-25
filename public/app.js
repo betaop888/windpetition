@@ -140,6 +140,35 @@ function canSeeVoteTotals(proposal, user = state.currentUser) {
   return !proposal.voteTotalsHidden;
 }
 
+function readCache(key) {
+  if (typeof window === "undefined" || !window.localStorage) {
+    return null;
+  }
+
+  try {
+    const raw = window.localStorage.getItem(key);
+    if (!raw) {
+      return null;
+    }
+
+    return JSON.parse(raw);
+  } catch (error) {
+    return null;
+  }
+}
+
+function writeCache(key, value) {
+  if (typeof window === "undefined" || !window.localStorage) {
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    // ignore cache errors
+  }
+}
+
 function formatProposalId(proposal) {
   const rawPublicId = String(proposal?.publicId || "").trim();
   if (/^\d{4,}$/.test(rawPublicId)) {
@@ -761,8 +790,16 @@ async function initProposalBoard(scope, options) {
   }
 
   try {
+    const cacheKey = `wp:proposals:${scope}`;
+    const cached = readCache(cacheKey);
+    if (Array.isArray(cached)) {
+      proposals = cached;
+      render();
+    }
+
     const data = await api(`/api/proposals/list?scope=${scope}`);
     proposals = data.proposals || [];
+    writeCache(cacheKey, proposals);
     render();
   } catch (error) {
     if (error.status === 401) {
@@ -1322,8 +1359,12 @@ async function initRegistryPage() {
   const modalBody = document.getElementById("registryModalBody");
   const modalReason = document.getElementById("registryModalReason");
   const modalReasonRow = document.getElementById("registryModalReasonRow");
+  const modalActions = document.getElementById("registryModalActions");
+  const modalDeleteButton = document.getElementById("registryDeleteBtn");
   const canCreate = isAdmin() || isMinister();
+  const canDelete = isAdmin();
   let entriesById = new Map();
+  let activeEntryId = null;
 
   if (form) {
     form.style.display = canCreate ? "block" : "none";
@@ -1333,6 +1374,7 @@ async function initRegistryPage() {
     if (modal) {
       modal.classList.remove("active");
     }
+    activeEntryId = null;
   };
 
   const openEntry = (entryId) => {
@@ -1340,6 +1382,7 @@ async function initRegistryPage() {
     if (!entry || !modal) {
       return;
     }
+    activeEntryId = entryId;
 
     if (modalTitle) {
       modalTitle.textContent = entry.title;
@@ -1369,6 +1412,10 @@ async function initRegistryPage() {
 
     if (modalReason) {
       modalReason.textContent = entry.reason || "";
+    }
+
+    if (modalActions) {
+      modalActions.style.display = canDelete ? "flex" : "none";
     }
 
     modal.classList.add("active");
@@ -1423,22 +1470,59 @@ async function initRegistryPage() {
     }
   });
 
+  if (modalDeleteButton && canDelete) {
+    modalDeleteButton.addEventListener("click", async () => {
+      if (!Number.isInteger(activeEntryId) || activeEntryId <= 0) {
+        return;
+      }
+
+      const entry = entriesById.get(activeEntryId);
+      const title = entry ? entry.title : `#${activeEntryId}`;
+      const ok = window.confirm(`Удалить запись реестра "${title}"? Это действие необратимо.`);
+      if (!ok) {
+        return;
+      }
+
+      modalDeleteButton.disabled = true;
+      try {
+        await api("/api/registry/delete", {
+          method: "POST",
+          body: { entryId: activeEntryId },
+        });
+        closeModal();
+        await loadEntries();
+      } catch (error) {
+        alert(error.message);
+      } finally {
+        modalDeleteButton.disabled = false;
+      }
+    });
+  }
+
   const loadEntries = async () => {
     if (!list) {
       return;
     }
 
     try {
+      const cached = readCache("wp:registry:entries");
+      if (Array.isArray(cached) && cached.length > 0) {
+        entriesById = new Map(cached.map((entry) => [entry.id, entry]));
+        list.innerHTML = cached.map(registryCardTemplate).join("");
+      }
+
       const data = await api("/api/registry/list");
       const entries = data.entries || [];
 
       if (entries.length === 0) {
         entriesById = new Map();
+        writeCache("wp:registry:entries", []);
         list.innerHTML = '<p class="empty-message">В реестре пока нет записей.</p>';
         return;
       }
 
       entriesById = new Map(entries.map((entry) => [entry.id, entry]));
+      writeCache("wp:registry:entries", entries);
       list.innerHTML = entries.map(registryCardTemplate).join("");
     } catch (error) {
       entriesById = new Map();
@@ -1623,14 +1707,20 @@ async function bootstrap() {
     alert("Не удалось выполнить вход через Discord. Попробуйте снова.");
   }
 
+  const startNotificationsLoad = () => {
+    loadNotifications(true).catch((error) => {
+      console.error("Failed to load notifications", error);
+    });
+  };
+
   if (!state.currentUser) {
     showAuthRequired("Вход и регистрация доступны только через Discord.");
-    await loadNotifications(true);
+    startNotificationsLoad();
     return;
   }
 
   hideAuthRequired();
-  await loadNotifications(true);
+  startNotificationsLoad();
 
   const metaPage = document.querySelector('meta[name="page-id"]')?.getAttribute("content") || "";
   const page = document.body.dataset.page || metaPage;

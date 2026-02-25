@@ -1569,6 +1569,18 @@ body {
   line-height: 1.6;
 }
 
+.registry-modal-actions {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #2a2a2a;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.registry-modal-actions .btn-danger {
+  margin-top: 0;
+}
+
 .profile-role {
   margin-top: 1rem;
 }

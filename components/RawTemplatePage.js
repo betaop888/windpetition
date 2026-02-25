@@ -10,7 +10,7 @@ export default function RawTemplatePage({ bodyHtml, pageId, title }) {
         <meta name="page-id" content={pageId} />
       </Head>
       <div dangerouslySetInnerHTML={{ __html: bodyHtml }} />
-      <Script src="/app.js" strategy="afterInteractive" />
+      <Script src="/app.js" strategy="beforeInteractive" />
     </>
   );
 }
