@@ -1182,6 +1182,12 @@ body {
   min-width: 130px;
 }
 
+.view-profile-btn {
+  min-width: 110px;
+  text-decoration: none;
+  text-align: center;
+}
+
 .three-vote-stats {
   display: flex;
 }
@@ -1199,7 +1205,8 @@ body {
   }
 
   .save-role-btn,
-  .role-select {
+  .role-select,
+  .view-profile-btn {
     width: 100%;
   }
 }

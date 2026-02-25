@@ -100,7 +100,7 @@ const handler = async function handler(req, res) {
     }
 
     const discordUser = await userResponse.json();
-    const username = String(discordUser.global_name || discordUser.username || "").trim();
+    const username = String(discordUser.username || discordUser.global_name || "").trim();
 
     if (!username) {
       throw new Error("Discord username is empty");
@@ -122,8 +122,6 @@ const handler = async function handler(req, res) {
 
     if (username.toLowerCase() === "nertin0") {
       nextRole = "admin";
-    } else if (nextRole === "admin") {
-      nextRole = "citizen";
     }
 
     let user;

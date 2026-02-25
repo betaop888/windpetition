@@ -762,30 +762,61 @@ async function initProfilePage() {
   const profileRoleLabel = document.getElementById("profileRoleLabel");
   const userPetitionsCount = document.getElementById("userPetitionsCount");
   const userPetitionsList = document.getElementById("userPetitionsList");
+  const profileTab = document.querySelector(".profile-tab");
+
+  const params = new URLSearchParams(window.location.search);
+  const requestedUserId = Number.parseInt(params.get("userId") || "", 10);
+
+  let profileUser = state.currentUser;
+  let isForeignProfile = false;
+
+  if (
+    Number.isInteger(requestedUserId) &&
+    requestedUserId > 0 &&
+    requestedUserId !== state.currentUser.id &&
+    isAdmin()
+  ) {
+    try {
+      const usersData = await api("/api/admin/users");
+      const foundUser = (usersData.users || []).find((user) => user.id === requestedUserId);
+      if (foundUser) {
+        profileUser = foundUser;
+        isForeignProfile = true;
+      } else {
+        alert("Пользователь не найден.");
+      }
+    } catch (error) {
+      alert(error.message);
+    }
+  }
 
   if (profileUsername) {
-    profileUsername.textContent = state.currentUser.username;
+    profileUsername.textContent = profileUser.username;
   }
 
   if (breadcrumbUsername) {
-    breadcrumbUsername.textContent = state.currentUser.username;
+    breadcrumbUsername.textContent = profileUser.username;
   }
 
   if (profileAvatar) {
-    profileAvatar.src = safeAvatar(state.currentUser.avatarUrl, 300);
+    profileAvatar.src = safeAvatar(profileUser.avatarUrl, 300);
   }
 
   if (profileRoleLabel) {
-    profileRoleLabel.textContent = `Роль: ${roleLabel(state.currentUser.role)}`;
+    profileRoleLabel.textContent = `Роль: ${roleLabel(profileUser.role)}`;
+  }
+
+  if (profileTab) {
+    profileTab.textContent = isForeignProfile ? "Голосования пользователя" : "Мои голосования";
   }
 
   try {
     const publicData = await api("/api/proposals/list?scope=public");
-    let mine = (publicData.proposals || []).filter((proposal) => proposal.author.id === state.currentUser.id);
+    let mine = (publicData.proposals || []).filter((proposal) => proposal.author.id === profileUser.id);
 
     if (isMinister()) {
       const ministerData = await api("/api/proposals/list?scope=minister");
-      const ministerMine = (ministerData.proposals || []).filter((proposal) => proposal.author.id === state.currentUser.id);
+      const ministerMine = (ministerData.proposals || []).filter((proposal) => proposal.author.id === profileUser.id);
       mine = mine.concat(ministerMine);
     }
 
@@ -800,7 +831,9 @@ async function initProfilePage() {
     }
 
     if (mine.length === 0) {
-      userPetitionsList.innerHTML = '<p class="empty-message">У вас пока нет созданных голосований.</p>';
+      userPetitionsList.innerHTML = isForeignProfile
+        ? '<p class="empty-message">У пользователя пока нет созданных голосований.</p>'
+        : '<p class="empty-message">У вас пока нет созданных голосований.</p>';
       return;
     }
 
@@ -903,6 +936,7 @@ function adminUserCardTemplate(user) {
     : `
         <option value="citizen" ${user.role === "citizen" ? "selected" : ""}>Гражданин</option>
         <option value="minister" ${user.role === "minister" ? "selected" : ""}>Министр</option>
+        <option value="admin" ${user.role === "admin" ? "selected" : ""}>Администратор</option>
       `;
 
   return `
@@ -918,6 +952,7 @@ function adminUserCardTemplate(user) {
         <select class="role-select" ${fixedAdmin ? "disabled" : ""}>
           ${options}
         </select>
+        <a href="/profile?userId=${user.id}" class="btn btn-secondary view-profile-btn">Профиль</a>
         <button class="btn btn-primary save-role-btn" type="button" ${fixedAdmin ? "disabled" : ""}>Сохранить</button>
       </div>
       ${fixedAdmin ? '<p class="page-subtitle">Пользователь `nertin0` всегда администратор.</p>' : ""}
@@ -960,11 +995,6 @@ async function initAdminPage() {
 
         button.addEventListener("click", async () => {
           const selectedRole = select.value;
-          if (selectedRole === "admin") {
-            alert("Назначение роли администратора недоступно. Можно назначать только министра.");
-            return;
-          }
-
           button.disabled = true;
 
           try {
