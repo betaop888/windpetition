@@ -102,10 +102,13 @@
             <div class="stat-segment stat-segment-against" id="statBarAgainst"></div>
             <div class="stat-segment stat-segment-abstain" id="statBarAbstain"></div>
           </div>
-          <div class="stat-numbers three-way-stats">
-            <span class="stat-for"><span id="forPercentage">0</span>% За (<span id="forCount">0</span>)</span>
-            <span class="stat-against"><span id="againstPercentage">0</span>% Против (<span id="againstCount">0</span>)</span>
-            <span class="stat-abstain"><span id="abstainPercentage">0</span>% Воздерж. (<span id="abstainCount">0</span>)</span>
+          <div class="results-hidden-notice" id="resultsHiddenNotice" style="display: none;">
+            Результаты скрыты до завершения периода голосования.
+          </div>
+          <div class="stat-numbers three-way-stats" id="voteCountBlock">
+            <span class="stat-for">За: <span id="forCount">0</span></span>
+            <span class="stat-against">Против: <span id="againstCount">0</span></span>
+            <span class="stat-abstain">Воздерж.: <span id="abstainCount">0</span></span>
           </div>
         </div>
       </div>

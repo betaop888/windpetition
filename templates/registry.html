@@ -57,7 +57,7 @@
       <div class="section-header">
         <div>
           <h2 class="section-title">Реестр решений</h2>
-          <p class="page-subtitle">Здесь публикуются принятые и отклонённые инициативы.</p>
+          <p class="page-subtitle">Здесь публикуются принятые и отклонённые инициативы. Нажмите на запись, чтобы открыть полный текст.</p>
         </div>
       </div>
 
@@ -104,9 +104,28 @@
         </div>
       </form>
 
-      <div class="petitions-grid" id="registryList"></div>
+      <div class="petitions-grid registry-grid" id="registryList"></div>
     </section>
   </main>
+
+  <div class="modal" id="registryEntryModal">
+    <div class="modal-content registry-modal-content">
+      <button class="modal-close" id="registryModalClose" type="button" aria-label="Закрыть">&times;</button>
+      <div class="registry-modal-head">
+        <h3 class="modal-title" id="registryModalTitle">Запись реестра</h3>
+        <span class="mini-badge" id="registryModalDecision">Принято</span>
+      </div>
+      <div class="registry-modal-meta">
+        <span>Автор: <strong id="registryModalAuthor">-</strong></span>
+        <span>Дата: <strong id="registryModalDate">-</strong></span>
+      </div>
+      <div class="registry-modal-body" id="registryModalBody"></div>
+      <div class="registry-modal-reason" id="registryModalReasonRow" style="display: none;">
+        <h4>Комментарий</h4>
+        <p id="registryModalReason"></p>
+      </div>
+    </div>
+  </div>
 
   <div class="modal" id="authModal">
     <div class="modal-content">

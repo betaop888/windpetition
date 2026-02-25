@@ -1,7 +1,7 @@
 const { getSessionUser, isAdmin, isMinister } = require("../../../lib/server/auth");
 const { sql } = require("../../../lib/server/db");
 const { methodNotAllowed, parseInteger, sendJson } = require("../../../lib/server/http");
-const { mapProposalRow, settleExpiredProposals } = require("../../../lib/server/proposals");
+const { applyVoteVisibility, mapProposalRow, settleExpiredProposals } = require("../../../lib/server/proposals");
 
 const handler = async function handler(req, res) {
   if (req.method !== "GET") {
@@ -54,13 +54,15 @@ const handler = async function handler(req, res) {
       return sendJson(res, 404, { error: "Proposal not found" });
     }
 
-    const proposal = mapProposalRow(result.rows[0]);
+    const canSeeVoters = isAdmin(user);
+    const proposal = applyVoteVisibility(mapProposalRow(result.rows[0]), {
+      canSeeLiveResults: canSeeVoters,
+    });
 
     if (proposal.scope === "minister" && !isMinister(user)) {
       return sendJson(res, 403, { error: "Minister access required" });
     }
 
-    const canSeeVoters = isAdmin(user);
     const voters = {
       for: [],
       against: [],

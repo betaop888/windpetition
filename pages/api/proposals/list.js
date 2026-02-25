@@ -1,7 +1,7 @@
-const { getSessionUser, isMinister } = require("../../../lib/server/auth");
+const { getSessionUser, isAdmin, isMinister } = require("../../../lib/server/auth");
 const { sql } = require("../../../lib/server/db");
 const { methodNotAllowed, sendJson } = require("../../../lib/server/http");
-const { mapProposalRow, settleExpiredProposals } = require("../../../lib/server/proposals");
+const { applyVoteVisibility, mapProposalRow, settleExpiredProposals } = require("../../../lib/server/proposals");
 
 const handler = async function handler(req, res) {
   if (req.method !== "GET") {
@@ -51,7 +51,10 @@ const handler = async function handler(req, res) {
       ORDER BY p.created_at DESC
     `;
 
-    const proposals = rows.map(mapProposalRow);
+    const canSeeLiveResults = isAdmin(user);
+    const proposals = rows
+      .map(mapProposalRow)
+      .map((proposal) => applyVoteVisibility(proposal, { canSeeLiveResults }));
 
     sendJson(res, 200, {
       proposals,

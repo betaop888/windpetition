@@ -1,4 +1,4 @@
-const { getSessionUser, isMinister } = require("../../../lib/server/auth");
+const { getSessionUser, isAdmin, isMinister } = require("../../../lib/server/auth");
 const { sql } = require("../../../lib/server/db");
 const { methodNotAllowed, parseInteger, readJsonBody, sendJson } = require("../../../lib/server/http");
 const { settleExpiredProposals } = require("../../../lib/server/proposals");
@@ -69,6 +69,13 @@ const handler = async function handler(req, res) {
       VALUES (${proposalId}, ${user.id}, ${voteValue})
     `;
 
+    if (!isAdmin(user)) {
+      return sendJson(res, 200, {
+        success: true,
+        voteTotalsHidden: true,
+      });
+    }
+
     const totalsResult = await sql`
       SELECT
         COALESCE(SUM(CASE WHEN value = 'for' THEN 1 ELSE 0 END), 0)::INTEGER AS for_votes,
@@ -81,6 +88,7 @@ const handler = async function handler(req, res) {
 
     sendJson(res, 200, {
       success: true,
+      voteTotalsHidden: false,
       votes: {
         for: totalsResult.rows[0].for_votes,
         against: totalsResult.rows[0].against_votes,

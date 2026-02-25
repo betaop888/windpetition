@@ -394,6 +394,13 @@ body {
   display: flex;
   gap: 1rem;
   margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.results-hidden-label {
+  color: #8cbcff;
+  font-size: 0.9rem;
+  letter-spacing: 0.01em;
 }
 
 .empty-message {
@@ -661,7 +668,7 @@ body {
 
 /* Create Petition Page */
 .create-petition-container {
-  max-width: 800px;
+  max-width: 920px;
   margin: 0 auto;
 }
 
@@ -681,6 +688,36 @@ body {
   font-size: 1.05rem;
   margin-top: 0.75rem;
   line-height: 1.6;
+}
+
+.create-insights {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.create-insight-card {
+  border: 1px solid #22364f;
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  background: linear-gradient(160deg, rgba(20, 36, 57, 0.65) 0%, rgba(12, 20, 31, 0.9) 100%);
+}
+
+.create-insight-card-warning {
+  border-color: #534125;
+  background: linear-gradient(160deg, rgba(49, 37, 17, 0.6) 0%, rgba(17, 14, 10, 0.9) 100%);
+}
+
+.create-insight-title {
+  font-size: 0.95rem;
+  margin-bottom: 0.45rem;
+}
+
+.create-insight-text {
+  color: #b8bec8;
+  font-size: 0.9rem;
+  line-height: 1.55;
 }
 
 .petition-form {
@@ -864,6 +901,16 @@ body {
   display: flex;
   justify-content: space-between;
   font-size: 1.1rem;
+}
+
+.results-hidden-notice {
+  display: none;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #274569;
+  color: #95c3ff;
+  background: rgba(20, 45, 73, 0.35);
+  margin-top: 0.25rem;
 }
 
 .stat-for {
@@ -1135,12 +1182,101 @@ body {
 
 .registry-form {
   margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.registry-form::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at top right, rgba(74, 158, 255, 0.1), transparent 38%);
 }
 
 .registry-reason {
   color: #aaa;
   font-size: 0.9rem;
   margin-bottom: 1rem;
+}
+
+.registry-grid .petition-card-description {
+  -webkit-line-clamp: 4;
+}
+
+.registry-card {
+  border-color: #23364f;
+}
+
+.registry-card:hover {
+  border-color: #3b5f87;
+}
+
+.registry-open-hint {
+  margin-left: auto;
+  color: #7cb3ff;
+  font-size: 0.82rem;
+}
+
+.registry-card .petition-card-meta {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.registry-modal-content {
+  max-width: 780px;
+}
+
+.registry-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-right: 2rem;
+}
+
+.registry-modal-head .modal-title {
+  margin: 0;
+}
+
+.registry-modal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  color: #9aa5b7;
+  font-size: 0.92rem;
+  margin-bottom: 1rem;
+}
+
+.registry-modal-body {
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  background: #101010;
+  padding: 1rem;
+  white-space: pre-wrap;
+  line-height: 1.7;
+  color: #d8d8d8;
+  max-height: 55vh;
+  overflow-y: auto;
+}
+
+.registry-modal-reason {
+  margin-top: 1rem;
+  border-top: 1px solid #2a2a2a;
+  padding-top: 1rem;
+}
+
+.registry-modal-reason h4 {
+  font-size: 0.95rem;
+  margin-bottom: 0.35rem;
+}
+
+.registry-modal-reason p {
+  color: #b8b8b8;
+  font-size: 0.92rem;
+  line-height: 1.6;
 }
 
 .profile-role {
@@ -1196,6 +1332,10 @@ body {
   .voting-buttons {
     grid-template-columns: 1fr;
   }
+
+  .create-insights {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
@@ -1208,5 +1348,15 @@ body {
   .role-select,
   .view-profile-btn {
     width: 100%;
+  }
+
+  .registry-modal-head {
+    padding-right: 1.2rem;
+  }
+
+  .registry-card .petition-card-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.45rem;
   }
 }

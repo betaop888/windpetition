@@ -115,6 +115,27 @@ function percentage(part, total) {
   return Math.round((part / total) * 100);
 }
 
+function asVoteNumber(value) {
+  if (Number.isInteger(value)) {
+    return value;
+  }
+
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : 0;
+}
+
+function canSeeVoteTotals(proposal, user = state.currentUser) {
+  if (!proposal) {
+    return false;
+  }
+
+  if (isAdmin(user)) {
+    return true;
+  }
+
+  return !proposal.voteTotalsHidden;
+}
+
 async function api(path, options = {}) {
   const requestOptions = {
     method: options.method || "GET",
@@ -270,11 +291,8 @@ function updateCommonUserUI() {
 }
 
 function proposalCardTemplate(proposal) {
-  const total = proposal.votes.total;
-  const forPercent = percentage(proposal.votes.for, total);
-  const againstPercent = percentage(proposal.votes.against, total);
-  const abstainPercent = percentage(proposal.votes.abstain, total);
   const statusMeta = getStatusMeta(proposal);
+  const showVotes = canSeeVoteTotals(proposal);
 
   return `
     <a href="/petition-detail?id=${proposal.id}" class="petition-card">
@@ -294,9 +312,15 @@ function proposalCardTemplate(proposal) {
           <span>${statusMeta.text}</span>
         </div>
         <div class="petition-card-stats three-vote-stats">
-          <span>За: ${proposal.votes.for} (${forPercent}%)</span>
-          <span>Против: ${proposal.votes.against} (${againstPercent}%)</span>
-          <span>Воздерж.: ${proposal.votes.abstain} (${abstainPercent}%)</span>
+          ${
+            showVotes
+              ? `
+                <span>За: ${asVoteNumber(proposal.votes.for)}</span>
+                <span>Против: ${asVoteNumber(proposal.votes.against)}</span>
+                <span>Воздерж.: ${asVoteNumber(proposal.votes.abstain)}</span>
+              `
+              : '<span class="results-hidden-label">Результаты скрыты до завершения голосования</span>'
+          }
         </div>
       </div>
     </a>
@@ -396,7 +420,7 @@ async function initHomePage() {
   await initProposalBoard("public", {
     createButtonId: "createPetitionBtn",
     createUrl: "/create-petition?scope=public",
-    canCreate: (user) => isAdmin(user),
+    canCreate: (user) => Boolean(user),
   });
 }
 
@@ -432,40 +456,49 @@ function renderVoteList(listElementId, users) {
 }
 
 function updateVoteNumbers(proposal) {
-  const total = proposal.votes.total;
-  const forPercent = percentage(proposal.votes.for, total);
-  const againstPercent = percentage(proposal.votes.against, total);
-  const abstainPercent = percentage(proposal.votes.abstain, total);
+  const showVotes = canSeeVoteTotals(proposal);
+  const forVotes = asVoteNumber(proposal.votes.for);
+  const againstVotes = asVoteNumber(proposal.votes.against);
+  const abstainVotes = asVoteNumber(proposal.votes.abstain);
+  const total = asVoteNumber(proposal.votes.total);
+  const forPercent = percentage(forVotes, total);
+  const againstPercent = percentage(againstVotes, total);
+  const abstainPercent = percentage(abstainVotes, total);
 
   const forCount = document.getElementById("forCount");
   const againstCount = document.getElementById("againstCount");
   const abstainCount = document.getElementById("abstainCount");
-  const forPercentage = document.getElementById("forPercentage");
-  const againstPercentage = document.getElementById("againstPercentage");
-  const abstainPercentage = document.getElementById("abstainPercentage");
+  const voteCountBlock = document.getElementById("voteCountBlock");
+  const resultsHiddenNotice = document.getElementById("resultsHiddenNotice");
 
-  if (forCount) {
-    forCount.textContent = String(proposal.votes.for);
-  }
+  if (showVotes) {
+    if (forCount) {
+      forCount.textContent = String(forVotes);
+    }
 
-  if (againstCount) {
-    againstCount.textContent = String(proposal.votes.against);
-  }
+    if (againstCount) {
+      againstCount.textContent = String(againstVotes);
+    }
 
-  if (abstainCount) {
-    abstainCount.textContent = String(proposal.votes.abstain);
-  }
+    if (abstainCount) {
+      abstainCount.textContent = String(abstainVotes);
+    }
 
-  if (forPercentage) {
-    forPercentage.textContent = String(forPercent);
-  }
+    if (voteCountBlock) {
+      voteCountBlock.style.display = "flex";
+    }
 
-  if (againstPercentage) {
-    againstPercentage.textContent = String(againstPercent);
-  }
+    if (resultsHiddenNotice) {
+      resultsHiddenNotice.style.display = "none";
+    }
+  } else {
+    if (voteCountBlock) {
+      voteCountBlock.style.display = "none";
+    }
 
-  if (abstainPercentage) {
-    abstainPercentage.textContent = String(abstainPercent);
+    if (resultsHiddenNotice) {
+      resultsHiddenNotice.style.display = "block";
+    }
   }
 
   const statBarFor = document.getElementById("statBarFor");
@@ -473,15 +506,15 @@ function updateVoteNumbers(proposal) {
   const statBarAbstain = document.getElementById("statBarAbstain");
 
   if (statBarFor) {
-    statBarFor.style.width = `${forPercent}%`;
+    statBarFor.style.width = showVotes ? `${forPercent}%` : "33.34%";
   }
 
   if (statBarAgainst) {
-    statBarAgainst.style.width = `${againstPercent}%`;
+    statBarAgainst.style.width = showVotes ? `${againstPercent}%` : "33.33%";
   }
 
   if (statBarAbstain) {
-    statBarAbstain.style.width = `${abstainPercent}%`;
+    statBarAbstain.style.width = showVotes ? `${abstainPercent}%` : "33.33%";
   }
 }
 
@@ -614,15 +647,15 @@ async function initDetailPage() {
     const votersAbstainCount = document.getElementById("votersAbstainCount");
 
     if (votersForCount) {
-      votersForCount.textContent = String(proposal.votes.for);
+      votersForCount.textContent = String(asVoteNumber(proposal.votes.for));
     }
 
     if (votersAgainstCount) {
-      votersAgainstCount.textContent = String(proposal.votes.against);
+      votersAgainstCount.textContent = String(asVoteNumber(proposal.votes.against));
     }
 
     if (votersAbstainCount) {
-      votersAbstainCount.textContent = String(proposal.votes.abstain);
+      votersAbstainCount.textContent = String(asVoteNumber(proposal.votes.abstain));
     }
 
     const adminSection = document.getElementById("adminVotersSection");
@@ -659,12 +692,6 @@ async function initCreatePage() {
   const params = new URLSearchParams(window.location.search);
   const scope = params.get("scope") === "minister" ? "minister" : "public";
 
-  if (scope === "public" && !isAdmin()) {
-    alert("Создание публичных голосований доступно только администратору.");
-    window.location.href = "/";
-    return;
-  }
-
   if (scope === "minister" && !isMinister()) {
     alert("Создание голосований министров доступно только министру.");
     window.location.href = "/";
@@ -678,6 +705,9 @@ async function initCreatePage() {
   const cancelButton = document.getElementById("cancelCreateBtn");
   const submitButton = document.getElementById("submitCreateBtn");
   const deadlineInput = document.getElementById("proposalDeadline");
+  const resultRuleText = document.getElementById("resultRuleText");
+  const creationLimitText = document.getElementById("creationLimitText");
+  const creationLimitTitle = document.getElementById("creationLimitTitle");
 
   const scopeText = scope === "minister" ? "Голосования министров" : "Публичные голосования";
 
@@ -686,11 +716,26 @@ async function initCreatePage() {
   }
 
   if (createPageSubtitle) {
-    createPageSubtitle.textContent = "После дедлайна статус изменится автоматически: >50% За — отправлено на рассмотрение, иначе — отклонено.";
+    createPageSubtitle.textContent = "Публикация сразу становится доступна всем пользователям в выбранном разделе.";
   }
 
   if (scopeLabel) {
     scopeLabel.value = scopeText;
+  }
+
+  if (resultRuleText) {
+    resultRuleText.textContent = "После дедлайна: если голосов «За» больше 50%, статус станет «Отправлено на рассмотрение», иначе «Отклонено».";
+  }
+
+  if (creationLimitTitle) {
+    creationLimitTitle.textContent = scope === "minister" ? "Правило раздела" : "Ограничение";
+  }
+
+  if (creationLimitText) {
+    creationLimitText.textContent =
+      scope === "minister"
+        ? "Этот раздел только для министров и администратора. Голосовать здесь могут только министры."
+        : "С одного аккаунта можно создать до 2 публичных голосований за 24 часа.";
   }
 
   if (deadlineInput) {
@@ -847,7 +892,7 @@ async function initProfilePage() {
 
 function registryCardTemplate(entry) {
   return `
-    <article class="petition-card">
+    <article class="petition-card registry-card" data-entry-id="${entry.id}" tabindex="0" role="button" aria-label="Открыть запись «${escapeHtml(entry.title)}»">
       <div class="petition-card-header">
         <img src="${safeAvatar(entry.author.avatarUrl, 48)}" alt="${escapeHtml(entry.author.username)}" class="petition-card-icon">
         <div class="petition-card-owner">${escapeHtml(entry.author.username)}</div>
@@ -862,6 +907,7 @@ function registryCardTemplate(entry) {
       ${entry.reason ? `<p class="registry-reason"><strong>Комментарий:</strong> ${escapeHtml(entry.reason)}</p>` : ""}
       <div class="petition-card-meta">
         <span>${formatDateTime(entry.createdAt)}</span>
+        <span class="registry-open-hint">Открыть полностью</span>
       </div>
     </article>
   `;
@@ -870,11 +916,115 @@ function registryCardTemplate(entry) {
 async function initRegistryPage() {
   const form = document.getElementById("registryForm");
   const list = document.getElementById("registryList");
+  const modal = document.getElementById("registryEntryModal");
+  const modalClose = document.getElementById("registryModalClose");
+  const modalTitle = document.getElementById("registryModalTitle");
+  const modalDecision = document.getElementById("registryModalDecision");
+  const modalAuthor = document.getElementById("registryModalAuthor");
+  const modalDate = document.getElementById("registryModalDate");
+  const modalBody = document.getElementById("registryModalBody");
+  const modalReason = document.getElementById("registryModalReason");
+  const modalReasonRow = document.getElementById("registryModalReasonRow");
   const canCreate = isAdmin() || isMinister();
+  let entriesById = new Map();
 
   if (form) {
     form.style.display = canCreate ? "block" : "none";
   }
+
+  const closeModal = () => {
+    if (modal) {
+      modal.classList.remove("active");
+    }
+  };
+
+  const openEntry = (entryId) => {
+    const entry = entriesById.get(entryId);
+    if (!entry || !modal) {
+      return;
+    }
+
+    if (modalTitle) {
+      modalTitle.textContent = entry.title;
+    }
+
+    if (modalDecision) {
+      modalDecision.textContent = entry.decision === "accepted" ? "Принято" : "Отклонено";
+      modalDecision.classList.remove("badge-success", "badge-danger");
+      modalDecision.classList.add(entry.decision === "accepted" ? "badge-success" : "badge-danger");
+    }
+
+    if (modalAuthor) {
+      modalAuthor.textContent = entry.author.username;
+    }
+
+    if (modalDate) {
+      modalDate.textContent = formatDateTime(entry.createdAt);
+    }
+
+    if (modalBody) {
+      modalBody.textContent = entry.body;
+    }
+
+    if (modalReasonRow) {
+      modalReasonRow.style.display = entry.reason ? "block" : "none";
+    }
+
+    if (modalReason) {
+      modalReason.textContent = entry.reason || "";
+    }
+
+    modal.classList.add("active");
+  };
+
+  if (list) {
+    list.addEventListener("click", (event) => {
+      const card = event.target.closest(".registry-card");
+      if (!card) {
+        return;
+      }
+
+      const entryId = Number.parseInt(card.dataset.entryId || "", 10);
+      if (Number.isInteger(entryId)) {
+        openEntry(entryId);
+      }
+    });
+
+    list.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") {
+        return;
+      }
+
+      const card = event.target.closest(".registry-card");
+      if (!card) {
+        return;
+      }
+
+      event.preventDefault();
+      const entryId = Number.parseInt(card.dataset.entryId || "", 10);
+      if (Number.isInteger(entryId)) {
+        openEntry(entryId);
+      }
+    });
+  }
+
+  if (modalClose) {
+    modalClose.addEventListener("click", closeModal);
+  }
+
+  if (modal) {
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) {
+        closeModal();
+      }
+    });
+  }
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeModal();
+    }
+  });
 
   const loadEntries = async () => {
     if (!list) {
@@ -886,12 +1036,15 @@ async function initRegistryPage() {
       const entries = data.entries || [];
 
       if (entries.length === 0) {
+        entriesById = new Map();
         list.innerHTML = '<p class="empty-message">В реестре пока нет записей.</p>';
         return;
       }
 
+      entriesById = new Map(entries.map((entry) => [entry.id, entry]));
       list.innerHTML = entries.map(registryCardTemplate).join("");
     } catch (error) {
+      entriesById = new Map();
       list.innerHTML = `<p class="empty-message">${escapeHtml(error.message)}</p>`;
     }
   };
