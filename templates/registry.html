@@ -1,0 +1,122 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wind Petition - Реестр</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="registry">
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <path d="M20 5L5 15V25L20 35L35 25V15L20 5Z" stroke="white" stroke-width="2" fill="none"></path>
+        </svg>
+      </div>
+      <div class="nav-links">
+        <a href="/" class="nav-link">Главная</a>
+        <a href="/minister" class="nav-link" id="ministerNavLink" style="display: none;">Голосования министров</a>
+        <a href="/registry" class="nav-link active">Реестр</a>
+        <a href="/admin" class="nav-link" id="adminNavLink" style="display: none;">Админка</a>
+        <a href="/#petitions" class="nav-link">Голосования</a>
+      </div>
+      <div class="nav-user">
+        <button class="notification-btn" type="button" aria-label="Уведомления">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 2C8.34 2 7 3.34 7 5V5.29C5.19 6.08 4 7.86 4 10V14L2 16V17H18V16L16 14V10C16 7.86 14.81 6.08 13 5.29V5C13 3.34 11.66 2 10 2ZM10 20C11.1 20 12 19.1 12 18H8C8 19.1 8.9 20 10 20Z"></path>
+          </svg>
+        </button>
+        <div class="user-menu">
+          <img src="/placeholder.svg?height=40&width=40" alt="Пользователь" class="user-avatar" id="userAvatar">
+          <div class="user-dropdown" id="userDropdown">
+            <div class="dropdown-content">
+              <div class="dropdown-user-info" id="dropdownUserInfo">
+                <img src="/placeholder.svg?height=40&width=40" alt="Пользователь" class="dropdown-avatar" id="dropdownAvatar">
+                <div>
+                  <div class="dropdown-username" id="dropdownUsername">Гость</div>
+                  <a href="/profile" class="dropdown-profile-link">Открыть профиль</a>
+                </div>
+              </div>
+              <button class="btn btn-primary btn-full discord-login-btn" id="discordLoginBtnDropdown" style="display: none;">Войти через Discord</button>
+              <button class="dropdown-logout" id="logoutBtn" style="display: none;">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                  <path d="M6 2H2V14H6V12H4V4H6V2ZM11.5 8L8 4.5V7H4V9H8V11.5L11.5 8Z"></path>
+                </svg>
+                Выйти из аккаунта
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <section class="petitions-section">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Реестр решений</h2>
+          <p class="page-subtitle">Здесь публикуются принятые и отклонённые инициативы.</p>
+        </div>
+      </div>
+
+      <form class="petition-form registry-form" id="registryForm" style="display: none;">
+        <h3 class="profile-section-title">Добавить запись</h3>
+        <div class="form-group">
+          <label for="registryTitle">
+            <span class="label-text">Заголовок</span>
+            <span class="label-required">*</span>
+          </label>
+          <input type="text" id="registryTitle" maxlength="160" required>
+        </div>
+
+        <div class="form-group">
+          <label for="registryBody">
+            <span class="label-text">Описание</span>
+            <span class="label-required">*</span>
+          </label>
+          <textarea id="registryBody" rows="5" maxlength="5000" required></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="registryDecision">
+              <span class="label-text">Статус</span>
+              <span class="label-required">*</span>
+            </label>
+            <select id="registryDecision" required>
+              <option value="accepted">Принято</option>
+              <option value="rejected">Отклонено</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="registryReason">
+              <span class="label-text">Комментарий (необязательно)</span>
+            </label>
+            <input type="text" id="registryReason" maxlength="500" placeholder="Причина или пояснение">
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit">Опубликовать запись</button>
+        </div>
+      </form>
+
+      <div class="petitions-grid" id="registryList"></div>
+    </section>
+  </main>
+
+  <div class="modal" id="authModal">
+    <div class="modal-content">
+      <h2 class="modal-title">Требуется вход</h2>
+      <p class="modal-text" id="authRequiredText">Для работы с сайтом войдите через Discord.</p>
+      <button class="btn btn-primary btn-full discord-login-btn" id="discordLoginBtn">Войти через Discord</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+
