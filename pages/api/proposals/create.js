@@ -1,4 +1,4 @@
-﻿const { getSessionUser, isAdmin, isMinister } = require("../../../lib/server/auth");
+const { getSessionUser, isAdmin, isMinister } = require("../../../lib/server/auth");
 const { ensureSchema, sql } = require("../../../lib/server/db");
 const { methodNotAllowed, readJsonBody, sendJson } = require("../../../lib/server/http");
 
@@ -6,7 +6,7 @@ function normalizeText(value) {
   return String(value || "").trim();
 }
 
-module.exports = async function handler(req, res) {
+const handler = async function handler(req, res) {
   if (req.method !== "POST") {
     return methodNotAllowed(req, res, ["POST"]);
   }
@@ -84,4 +84,7 @@ module.exports = async function handler(req, res) {
     sendJson(res, 500, { error: "Failed to create proposal" });
   }
 };
+
+module.exports = handler;
+module.exports.default = handler;
 

@@ -1,11 +1,11 @@
-﻿const { getSessionUser, isMinister } = require("../../../lib/server/auth");
+const { getSessionUser, isMinister } = require("../../../lib/server/auth");
 const { sql } = require("../../../lib/server/db");
 const { methodNotAllowed, parseInteger, readJsonBody, sendJson } = require("../../../lib/server/http");
 const { settleExpiredProposals } = require("../../../lib/server/proposals");
 
 const ALLOWED_VOTES = new Set(["for", "against", "abstain"]);
 
-module.exports = async function handler(req, res) {
+const handler = async function handler(req, res) {
   if (req.method !== "POST") {
     return methodNotAllowed(req, res, ["POST"]);
   }
@@ -96,4 +96,7 @@ module.exports = async function handler(req, res) {
     sendJson(res, 500, { error: "Failed to submit vote" });
   }
 };
+
+module.exports = handler;
+module.exports.default = handler;
 

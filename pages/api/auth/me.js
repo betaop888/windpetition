@@ -1,7 +1,7 @@
-﻿const { getSessionUser } = require("../../../lib/server/auth");
+const { getSessionUser } = require("../../../lib/server/auth");
 const { methodNotAllowed, sendJson } = require("../../../lib/server/http");
 
-module.exports = async function handler(req, res) {
+const handler = async function handler(req, res) {
   if (req.method !== "GET") {
     return methodNotAllowed(req, res, ["GET"]);
   }
@@ -18,4 +18,7 @@ module.exports = async function handler(req, res) {
     sendJson(res, 500, { error: "Failed to fetch current user" });
   }
 };
+
+module.exports = handler;
+module.exports.default = handler;
 

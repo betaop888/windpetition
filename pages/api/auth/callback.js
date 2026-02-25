@@ -35,7 +35,7 @@ function clearOAuthStateCookie() {
   });
 }
 
-module.exports = async function handler(req, res) {
+const handler = async function handler(req, res) {
   if (req.method !== "GET") {
     return methodNotAllowed(req, res, ["GET"]);
   }
@@ -165,3 +165,7 @@ module.exports = async function handler(req, res) {
     res.end();
   }
 };
+
+module.exports = handler;
+module.exports.default = handler;
+

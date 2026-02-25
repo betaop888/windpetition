@@ -5,7 +5,7 @@ const { methodNotAllowed } = require("../../../lib/server/http");
 
 const OAUTH_STATE_COOKIE = "windpetition_oauth_state";
 
-module.exports = async function handler(req, res) {
+const handler = async function handler(req, res) {
   try {
     if (req.method !== "GET") {
       return methodNotAllowed(req, res, ["GET"]);
@@ -57,3 +57,7 @@ module.exports = async function handler(req, res) {
     res.end(JSON.stringify({ error: "Failed to start Discord OAuth" }));
   }
 };
+
+module.exports = handler;
+module.exports.default = handler;
+

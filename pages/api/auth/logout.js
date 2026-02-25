@@ -1,4 +1,4 @@
-﻿const {
+const {
   clearSessionCookie,
   deleteSession,
   parseCookies,
@@ -6,7 +6,7 @@
 } = require("../../../lib/server/auth");
 const { methodNotAllowed, sendJson } = require("../../../lib/server/http");
 
-module.exports = async function handler(req, res) {
+const handler = async function handler(req, res) {
   if (req.method !== "POST") {
     return methodNotAllowed(req, res, ["POST"]);
   }
@@ -24,4 +24,7 @@ module.exports = async function handler(req, res) {
     sendJson(res, 500, { error: "Logout failed" });
   }
 };
+
+module.exports = handler;
+module.exports.default = handler;
 

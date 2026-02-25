@@ -1,8 +1,8 @@
-﻿const { getSessionUser, isAdmin } = require("../../../lib/server/auth");
+const { getSessionUser, isAdmin } = require("../../../lib/server/auth");
 const { sql } = require("../../../lib/server/db");
 const { methodNotAllowed, parseInteger, readJsonBody, sendJson } = require("../../../lib/server/http");
 
-module.exports = async function handler(req, res) {
+const handler = async function handler(req, res) {
   if (req.method !== "POST") {
     return methodNotAllowed(req, res, ["POST"]);
   }
@@ -71,4 +71,7 @@ module.exports = async function handler(req, res) {
     sendJson(res, 500, { error: "Failed to update role" });
   }
 };
+
+module.exports = handler;
+module.exports.default = handler;
 
