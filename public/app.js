@@ -4,6 +4,10 @@ const ROLE_CITIZEN = "citizen";
 
 const state = {
   currentUser: null,
+  notifications: [],
+  unreadNotifications: 0,
+  notificationsLoaded: false,
+  notificationsOpen: false,
 };
 
 function escapeHtml(value) {
@@ -134,6 +138,314 @@ function canSeeVoteTotals(proposal, user = state.currentUser) {
   }
 
   return !proposal.voteTotalsHidden;
+}
+
+function navIconSvg(key) {
+  if (key === "home") {
+    return '<svg viewBox="0 0 24 24" fill="none"><path d="M4 11.5L12 5L20 11.5V20H14V14H10V20H4V11.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path></svg>';
+  }
+
+  if (key === "minister") {
+    return '<svg viewBox="0 0 24 24" fill="none"><path d="M4 18V9L12 5L20 9V18L12 22L4 18Z" stroke="currentColor" stroke-width="1.8"></path><path d="M8 11H16M8 14H16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>';
+  }
+
+  if (key === "registry") {
+    return '<svg viewBox="0 0 24 24" fill="none"><path d="M6 3H18V21H6V3Z" stroke="currentColor" stroke-width="1.8"></path><path d="M9 8H15M9 12H15M9 16H13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>';
+  }
+
+  if (key === "admin") {
+    return '<svg viewBox="0 0 24 24" fill="none"><path d="M12 4L19 7V12C19 16.5 16.5 19.7 12 21C7.5 19.7 5 16.5 5 12V7L12 4Z" stroke="currentColor" stroke-width="1.8"></path><path d="M9 12L11 14L15 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
+  }
+
+  if (key === "petitions") {
+    return '<svg viewBox="0 0 24 24" fill="none"><path d="M5 6H19V18H5V6Z" stroke="currentColor" stroke-width="1.8"></path><path d="M8 10H16M8 13H16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>';
+  }
+
+  return '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"></circle></svg>';
+}
+
+function navIconKeyByHref(href) {
+  const normalized = String(href || "").trim();
+
+  if (normalized === "/" || normalized.startsWith("/?")) {
+    return "home";
+  }
+
+  if (normalized.startsWith("/minister")) {
+    return "minister";
+  }
+
+  if (normalized.startsWith("/registry")) {
+    return "registry";
+  }
+
+  if (normalized.startsWith("/admin")) {
+    return "admin";
+  }
+
+  if (normalized.startsWith("/#petitions") || normalized.includes("#petitions")) {
+    return "petitions";
+  }
+
+  return "home";
+}
+
+function enhanceSidebarNavigation() {
+  const body = document.body;
+  if (!body) {
+    return;
+  }
+
+  body.classList.add("with-sidebar-layout");
+
+  document.querySelectorAll(".nav-link").forEach((link) => {
+    if (link.dataset.iconReady === "1") {
+      return;
+    }
+
+    const label = link.textContent.trim();
+    const iconKey = navIconKeyByHref(link.getAttribute("href"));
+    link.dataset.iconReady = "1";
+    link.dataset.navLabel = label;
+    link.setAttribute("title", label);
+    link.innerHTML = `
+      <span class="nav-icon" aria-hidden="true">${navIconSvg(iconKey)}</span>
+      <span class="nav-label">${escapeHtml(label)}</span>
+    `;
+  });
+}
+
+function ensureNotificationsUI() {
+  const button = document.querySelector(".notification-btn");
+  const navUser = document.querySelector(".nav-user");
+
+  if (!button || !navUser) {
+    return null;
+  }
+
+  if (!button.querySelector(".notification-count")) {
+    const badge = document.createElement("span");
+    badge.className = "notification-count";
+    badge.style.display = "none";
+    button.appendChild(badge);
+  }
+
+  let popover = document.getElementById("notificationsPopover");
+  if (!popover) {
+    popover = document.createElement("div");
+    popover.id = "notificationsPopover";
+    popover.className = "notifications-popover";
+    popover.innerHTML = `
+      <div class="notifications-header">
+        <h3>Уведомления</h3>
+        <button class="notifications-mark-all" type="button" id="notificationsMarkAll">Прочитать все</button>
+      </div>
+      <div class="notifications-list" id="notificationsList">
+        <p class="empty-message compact-empty">Нет уведомлений</p>
+      </div>
+    `;
+    navUser.appendChild(popover);
+  }
+
+  return {
+    button,
+    badge: button.querySelector(".notification-count"),
+    popover,
+    list: popover.querySelector("#notificationsList"),
+    markAllButton: popover.querySelector("#notificationsMarkAll"),
+  };
+}
+
+function renderNotifications() {
+  const ui = ensureNotificationsUI();
+  if (!ui) {
+    return;
+  }
+
+  const unread = Number(state.unreadNotifications || 0);
+  if (ui.badge) {
+    if (unread > 0) {
+      ui.badge.style.display = "inline-flex";
+      ui.badge.textContent = unread > 99 ? "99+" : String(unread);
+    } else {
+      ui.badge.style.display = "none";
+      ui.badge.textContent = "";
+    }
+  }
+
+  if (!ui.list) {
+    return;
+  }
+
+  if (!state.currentUser) {
+    ui.list.innerHTML = '<p class="empty-message compact-empty">Войдите через Discord, чтобы видеть уведомления.</p>';
+    return;
+  }
+
+  if (!state.notificationsLoaded) {
+    ui.list.innerHTML = '<p class="empty-message compact-empty">Загрузка...</p>';
+    return;
+  }
+
+  if (!state.notifications.length) {
+    ui.list.innerHTML = '<p class="empty-message compact-empty">Нет уведомлений</p>';
+    return;
+  }
+
+  ui.list.innerHTML = state.notifications
+    .map((item) => {
+      const href = typeof item.href === "string" && item.href.startsWith("/") ? item.href : "";
+      return `
+        <button class="notification-item ${item.isRead ? "" : "unread"}" type="button" data-id="${item.id}" data-href="${escapeHtml(href)}">
+          <div class="notification-item-title">${escapeHtml(item.title)}</div>
+          <div class="notification-item-message">${escapeHtml(item.message)}</div>
+          <div class="notification-item-time">${formatDateTime(item.createdAt)}</div>
+        </button>
+      `;
+    })
+    .join("");
+}
+
+async function loadNotifications(force = false) {
+  if (!state.currentUser) {
+    state.notifications = [];
+    state.unreadNotifications = 0;
+    state.notificationsLoaded = true;
+    renderNotifications();
+    return;
+  }
+
+  if (state.notificationsLoaded && !force) {
+    renderNotifications();
+    return;
+  }
+
+  try {
+    const data = await api("/api/notifications/list?limit=40");
+    state.notifications = data.notifications || [];
+    state.unreadNotifications = Number(data.unreadCount || 0);
+    state.notificationsLoaded = true;
+    renderNotifications();
+  } catch (error) {
+    console.error("Failed to load notifications", error);
+    state.notifications = [];
+    state.unreadNotifications = 0;
+    state.notificationsLoaded = true;
+    renderNotifications();
+  }
+}
+
+async function markNotificationRead(notificationId) {
+  const parsedId = Number.parseInt(String(notificationId || ""), 10);
+  if (!Number.isInteger(parsedId) || parsedId <= 0) {
+    return;
+  }
+
+  try {
+    const data = await api("/api/notifications/read", {
+      method: "POST",
+      body: { id: parsedId },
+    });
+    state.unreadNotifications = Number(data.unreadCount || 0);
+    state.notifications = state.notifications.map((item) => {
+      if (item.id !== parsedId) {
+        return item;
+      }
+
+      return {
+        ...item,
+        isRead: true,
+      };
+    });
+    renderNotifications();
+  } catch (error) {
+    console.error("Failed to mark notification as read", error);
+  }
+}
+
+async function markAllNotificationsRead() {
+  if (!state.currentUser) {
+    return;
+  }
+
+  try {
+    const data = await api("/api/notifications/read", {
+      method: "POST",
+      body: { all: true },
+    });
+    state.unreadNotifications = Number(data.unreadCount || 0);
+    state.notifications = state.notifications.map((item) => ({
+      ...item,
+      isRead: true,
+    }));
+    renderNotifications();
+  } catch (error) {
+    console.error("Failed to mark all notifications as read", error);
+  }
+}
+
+function bindNotifications() {
+  const ui = ensureNotificationsUI();
+  if (!ui || ui.button.dataset.bound === "1") {
+    renderNotifications();
+    return;
+  }
+
+  ui.button.dataset.bound = "1";
+
+  ui.button.addEventListener("click", async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!state.currentUser) {
+      showAuthRequired("Для уведомлений войдите через Discord.");
+      return;
+    }
+
+    state.notificationsOpen = !state.notificationsOpen;
+    ui.popover.classList.toggle("active", state.notificationsOpen);
+
+    if (state.notificationsOpen) {
+      await loadNotifications(true);
+    }
+  });
+
+  ui.markAllButton?.addEventListener("click", async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    await markAllNotificationsRead();
+  });
+
+  ui.list?.addEventListener("click", async (event) => {
+    const button = event.target.closest(".notification-item");
+    if (!button) {
+      return;
+    }
+
+    const id = Number.parseInt(button.dataset.id || "", 10);
+    const href = String(button.dataset.href || "").trim();
+    await markNotificationRead(id);
+
+    if (href) {
+      window.location.href = href;
+      return;
+    }
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!ui.popover.classList.contains("active")) {
+      return;
+    }
+
+    if (ui.popover.contains(event.target) || ui.button.contains(event.target)) {
+      return;
+    }
+
+    state.notificationsOpen = false;
+    ui.popover.classList.remove("active");
+  });
+
+  renderNotifications();
 }
 
 async function api(path, options = {}) {
@@ -281,13 +593,15 @@ function updateCommonUserUI() {
 
   const ministerNavLink = document.getElementById("ministerNavLink");
   if (ministerNavLink) {
-    ministerNavLink.style.display = isMinister(user) ? "inline" : "none";
+    ministerNavLink.style.display = isMinister(user) ? "flex" : "none";
   }
 
   const adminNavLink = document.getElementById("adminNavLink");
   if (adminNavLink) {
-    adminNavLink.style.display = isAdmin(user) ? "inline" : "none";
+    adminNavLink.style.display = isAdmin(user) ? "flex" : "none";
   }
+
+  renderNotifications();
 }
 
 function proposalCardTemplate(proposal) {
@@ -1121,61 +1435,93 @@ async function initAdminPage() {
   }
 
   const list = document.getElementById("adminUsersList");
+  const searchInput = document.getElementById("adminUserSearch");
+  const usersCount = document.getElementById("adminUsersCount");
   if (!list) {
     return;
   }
 
-  const loadUsers = async () => {
-    try {
-      const data = await api("/api/admin/users");
-      const users = data.users || [];
+  let allUsers = [];
 
-      if (users.length === 0) {
-        list.innerHTML = '<p class="empty-message">Пользователи не найдены.</p>';
+  const bindUserCardActions = () => {
+    list.querySelectorAll(".admin-user-card").forEach((card) => {
+      const userId = Number.parseInt(card.dataset.userId || "", 10);
+      const select = card.querySelector(".role-select");
+      const button = card.querySelector(".save-role-btn");
+
+      if (!select || !button || !Number.isInteger(userId) || button.disabled) {
         return;
       }
 
-      list.innerHTML = users.map(adminUserCardTemplate).join("");
+      button.addEventListener("click", async () => {
+        const selectedRole = select.value;
+        button.disabled = true;
 
-      list.querySelectorAll(".admin-user-card").forEach((card) => {
-        const userId = Number.parseInt(card.dataset.userId || "", 10);
-        const select = card.querySelector(".role-select");
-        const button = card.querySelector(".save-role-btn");
+        try {
+          await api("/api/admin/role", {
+            method: "POST",
+            body: {
+              userId,
+              role: selectedRole,
+            },
+          });
 
-        if (!select || !button || !Number.isInteger(userId) || button.disabled) {
-          return;
+          await loadUsers();
+        } catch (error) {
+          alert(error.message);
+          button.disabled = false;
         }
-
-        button.addEventListener("click", async () => {
-          const selectedRole = select.value;
-          button.disabled = true;
-
-          try {
-            await api("/api/admin/role", {
-              method: "POST",
-              body: {
-                userId,
-                role: selectedRole,
-              },
-            });
-
-            await loadUsers();
-          } catch (error) {
-            alert(error.message);
-            button.disabled = false;
-          }
-        });
       });
+    });
+  };
+
+  const renderUsers = () => {
+    const query = (searchInput?.value || "").trim().toLowerCase();
+    const filteredUsers = allUsers.filter((user) => {
+      if (!query) {
+        return true;
+      }
+
+      return (
+        user.username.toLowerCase().includes(query) ||
+        roleLabel(user.role).toLowerCase().includes(query)
+      );
+    });
+
+    if (usersCount) {
+      usersCount.textContent = String(filteredUsers.length);
+    }
+
+    if (filteredUsers.length === 0) {
+      list.innerHTML = '<p class="empty-message">Пользователи не найдены.</p>';
+      return;
+    }
+
+    list.innerHTML = filteredUsers.map(adminUserCardTemplate).join("");
+    bindUserCardActions();
+  };
+
+  const loadUsers = async () => {
+    try {
+      const data = await api("/api/admin/users");
+      allUsers = data.users || [];
+      renderUsers();
     } catch (error) {
       list.innerHTML = `<p class="empty-message">${escapeHtml(error.message)}</p>`;
     }
   };
 
+  if (searchInput) {
+    searchInput.addEventListener("input", renderUsers);
+  }
+
   await loadUsers();
 }
 
 async function bootstrap() {
+  enhanceSidebarNavigation();
   bindDiscordButtons();
+  bindNotifications();
   bindLogoutButton();
   bindHeroButtons();
 
@@ -1195,10 +1541,12 @@ async function bootstrap() {
 
   if (!state.currentUser) {
     showAuthRequired("Вход и регистрация доступны только через Discord.");
+    await loadNotifications(true);
     return;
   }
 
   hideAuthRequired();
+  await loadNotifications(true);
 
   const metaPage = document.querySelector('meta[name="page-id"]')?.getAttribute("content") || "";
   const page = document.body.dataset.page || metaPage;

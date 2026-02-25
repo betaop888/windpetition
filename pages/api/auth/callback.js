@@ -7,6 +7,7 @@ const {
 const { serializeCookie } = require("../../../lib/server/cookies");
 const { ensureSchema, sql } = require("../../../lib/server/db");
 const { methodNotAllowed } = require("../../../lib/server/http");
+const { createNotificationsForUsers, findUserIdsByRoles } = require("../../../lib/server/notifications");
 
 const OAUTH_STATE_COOKIE = "windpetition_oauth_state";
 
@@ -146,6 +147,23 @@ const handler = async function handler(req, res) {
       `;
 
       user = inserted.rows[0];
+
+      const adminIds = await findUserIdsByRoles(["admin"]);
+      await createNotificationsForUsers(adminIds, {
+        type: "user_registered",
+        title: "Новая регистрация",
+        message: `Пользователь ${username} зарегистрировался через Discord.`,
+        href: `/profile?userId=${user.id}`,
+      });
+
+      if (nextRole === "citizen") {
+        await createNotificationsForUsers([user.id], {
+          type: "welcome",
+          title: "Добро пожаловать",
+          message: "Добро пожаловать в Wind Petition. Теперь вы можете участвовать в голосованиях и создавать публичные инициативы.",
+          href: "/",
+        });
+      }
     }
 
     const sessionToken = await createSession(user.id);

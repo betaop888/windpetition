@@ -1,6 +1,7 @@
 const { getSessionUser, isMinister } = require("../../../lib/server/auth");
 const { ensureSchema, sql } = require("../../../lib/server/db");
 const { methodNotAllowed, readJsonBody, sendJson } = require("../../../lib/server/http");
+const { createNotificationsForUsers, findUserIdsByRoles } = require("../../../lib/server/notifications");
 
 const PUBLIC_PROPOSAL_LIMIT = 2;
 const PUBLIC_PROPOSAL_LIMIT_WINDOW = "24 hours";
@@ -88,9 +89,18 @@ const handler = async function handler(req, res) {
       RETURNING id
     `;
 
+    const proposalId = insertResult.rows[0].id;
+    const targetIds = await findUserIdsByRoles(["admin", "minister"]);
+    await createNotificationsForUsers(targetIds, {
+      type: "proposal_created",
+      title: "Создано новое голосование",
+      message: `${user.username} создал(а) ${kind === "law" ? "законопроект" : "петицию"}: ${title}`,
+      href: `/petition-detail?id=${proposalId}`,
+    });
+
     sendJson(res, 201, {
       success: true,
-      proposalId: insertResult.rows[0].id,
+      proposalId,
     });
   } catch (error) {
     console.error("Failed to create proposal", error);
@@ -103,4 +113,3 @@ const handler = async function handler(req, res) {
 
 module.exports = handler;
 module.exports.default = handler;
-
