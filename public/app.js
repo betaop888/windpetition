@@ -140,6 +140,20 @@ function canSeeVoteTotals(proposal, user = state.currentUser) {
   return !proposal.voteTotalsHidden;
 }
 
+function formatProposalId(proposal) {
+  const rawPublicId = String(proposal?.publicId || "").trim();
+  if (/^\d{4,}$/.test(rawPublicId)) {
+    return rawPublicId;
+  }
+
+  const numeric = Number.parseInt(String(proposal?.id || ""), 10);
+  if (!Number.isInteger(numeric) || numeric <= 0) {
+    return "0000";
+  }
+
+  return String(numeric).padStart(4, "0");
+}
+
 function navIconSvg(key) {
   if (key === "home") {
     return '<svg viewBox="0 0 24 24" fill="none"><path d="M4 11.5L12 5L20 11.5V20H14V14H10V20H4V11.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"></path></svg>';
@@ -525,6 +539,34 @@ function bindLogoutButton() {
   });
 }
 
+function bindUserMenu() {
+  const userMenu = document.querySelector(".user-menu");
+  const userAvatar = document.getElementById("userAvatar");
+  const userDropdown = document.getElementById("userDropdown");
+
+  if (!userMenu || !userAvatar || userAvatar.dataset.bound === "1") {
+    return;
+  }
+
+  userAvatar.dataset.bound = "1";
+
+  userAvatar.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    userMenu.classList.toggle("open");
+  });
+
+  userDropdown?.addEventListener("click", (event) => {
+    event.stopPropagation();
+  });
+
+  document.addEventListener("click", (event) => {
+    if (!userMenu.contains(event.target)) {
+      userMenu.classList.remove("open");
+    }
+  });
+}
+
 function bindHeroButtons() {
   const heroProfileButton = document.getElementById("heroProfileBtn");
   if (!heroProfileButton) {
@@ -607,6 +649,7 @@ function updateCommonUserUI() {
 function proposalCardTemplate(proposal) {
   const statusMeta = getStatusMeta(proposal);
   const showVotes = canSeeVoteTotals(proposal);
+  const proposalCode = formatProposalId(proposal);
 
   return `
     <a href="/petition-detail?id=${proposal.id}" class="petition-card">
@@ -615,6 +658,7 @@ function proposalCardTemplate(proposal) {
         <div class="petition-card-owner">${escapeHtml(proposal.author.username)}</div>
       </div>
       <div class="card-badges">
+        <span class="mini-badge mini-badge-id">#${proposalCode}</span>
         <span class="mini-badge">${proposalKindLabel(proposal.kind)}</span>
         <span class="mini-badge">${proposal.scope === "minister" ? "Министры" : "Публично"}</span>
       </div>
@@ -913,6 +957,7 @@ async function initDetailPage() {
     const description = document.getElementById("petitionDescription");
     const petitionDate = document.getElementById("petitionDate");
     const petitionStatus = document.getElementById("petitionStatus");
+    const petitionCode = document.getElementById("petitionCode");
     const petitionOwner = document.getElementById("petitionOwner");
     const petitionOwnerAvatar = document.getElementById("petitionOwnerAvatar");
     const petitionKind = document.getElementById("petitionKind");
@@ -939,6 +984,10 @@ async function initDetailPage() {
       if (statusMeta.statusClass) {
         petitionStatus.classList.add(statusMeta.statusClass);
       }
+    }
+
+    if (petitionCode) {
+      petitionCode.textContent = `ID: ${formatProposalId(proposal)}`;
     }
 
     if (petitionOwner) {
@@ -974,6 +1023,8 @@ async function initDetailPage() {
 
     const adminSection = document.getElementById("adminVotersSection");
     const anonymousSection = document.getElementById("anonymousNoticeSection");
+    const adminActionsSection = document.getElementById("adminActionsSection");
+    const deleteProposalButton = document.getElementById("deleteProposalBtn");
 
     if (data.canSeeVoters) {
       if (adminSection) {
@@ -995,6 +1046,38 @@ async function initDetailPage() {
       if (anonymousSection) {
         anonymousSection.style.display = "block";
       }
+    }
+
+    if (isAdmin()) {
+      if (adminActionsSection) {
+        adminActionsSection.style.display = "block";
+      }
+
+      if (deleteProposalButton) {
+        deleteProposalButton.addEventListener("click", async () => {
+          const ok = window.confirm(
+            `Удалить голосование #${formatProposalId(proposal)}? Это действие необратимо.`
+          );
+          if (!ok) {
+            return;
+          }
+
+          deleteProposalButton.disabled = true;
+          try {
+            await api("/api/proposals/delete", {
+              method: "POST",
+              body: { proposalId: proposal.id },
+            });
+            alert("Голосование удалено.");
+            window.location.href = proposal.scope === "minister" ? "/minister" : "/";
+          } catch (error) {
+            alert(error.message);
+            deleteProposalButton.disabled = false;
+          }
+        });
+      }
+    } else if (adminActionsSection) {
+      adminActionsSection.style.display = "none";
     }
   } catch (error) {
     alert(error.message);
@@ -1521,6 +1604,7 @@ async function initAdminPage() {
 async function bootstrap() {
   enhanceSidebarNavigation();
   bindDiscordButtons();
+  bindUserMenu();
   bindNotifications();
   bindLogoutButton();
   bindHeroButtons();

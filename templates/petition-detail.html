@@ -65,6 +65,7 @@
           <h1 class="petition-detail-title" id="petitionTitle">Загрузка...</h1>
           <div class="petition-detail-meta">
             <span class="petition-status" id="petitionStatus">Активно</span>
+            <span class="petition-code" id="petitionCode">ID: 0000</span>
             <span class="petition-date" id="petitionDate"></span>
           </div>
         </div>
@@ -148,6 +149,11 @@
         <div class="sidebar-section" id="anonymousNoticeSection" style="display: none;">
           <h3>Анонимность</h3>
           <p class="page-subtitle">Голоса для пользователей отображаются анонимно. Только администратор видит, кто голосовал.</p>
+        </div>
+
+        <div class="sidebar-section" id="adminActionsSection" style="display: none;">
+          <h3>Действия администратора</h3>
+          <button class="btn btn-danger btn-full" id="deleteProposalBtn" type="button">Удалить голосование</button>
         </div>
       </div>
     </div>

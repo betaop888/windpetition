@@ -174,7 +174,7 @@ body {
 .user-dropdown {
   display: none;
   position: absolute;
-  left: calc(100% + 14px);
+  left: calc(100% + 8px);
   bottom: -8px;
   background-color: #121722;
   border: 1px solid #283247;
@@ -185,6 +185,10 @@ body {
 }
 
 .user-menu:hover .user-dropdown {
+  display: block;
+}
+
+.user-menu.open .user-dropdown {
   display: block;
 }
 
@@ -335,8 +339,8 @@ body {
 
 /* Main Content */
 .main-content {
-  width: calc(100% - 88px);
-  max-width: 1400px;
+  width: auto;
+  max-width: none;
   margin: 0 0 0 88px;
   padding: 2rem 2.2rem;
 }
@@ -420,6 +424,10 @@ body {
 
 .btn-danger:hover {
   background-color: #c82333;
+}
+
+.sidebar-section .btn-danger {
+  margin-top: 0;
 }
 
 .btn-full {
@@ -760,12 +768,13 @@ body {
 }
 
 .profile-sidebar {
-  position: sticky;
-  top: 100px;
+  position: relative;
   height: fit-content;
 }
 
 .profile-avatar-container {
+  position: sticky;
+  top: 1.15rem;
   background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
   border: 1px solid #2a2a2a;
   border-radius: 16px;
@@ -953,6 +962,7 @@ body {
   display: flex;
   gap: 1rem;
   align-items: center;
+  flex-wrap: wrap;
   color: #999;
 }
 
@@ -970,6 +980,18 @@ body {
 .petition-status.expired {
   background-color: #3a1a1a;
   color: #ef4444;
+}
+
+.petition-code {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.32rem 0.62rem;
+  border: 1px solid #22334b;
+  border-radius: 999px;
+  color: #8bbaff;
+  background: #0f1b2a;
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
 .petition-detail-image {
@@ -1244,6 +1266,11 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .profile-avatar-container {
+    position: static;
+    top: auto;
+  }
+
   .petition-detail-sidebar {
     position: static;
   }
@@ -1338,6 +1365,12 @@ body {
   font-size: 0.75rem;
   color: #bbb;
   background: #141414;
+}
+
+.mini-badge-id {
+  color: #8bbaff;
+  border-color: #294266;
+  background: #0e1b2d;
 }
 
 .badge-success {
