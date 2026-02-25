@@ -1,6 +1,6 @@
-﻿const crypto = require("crypto");
-const cookie = require("cookie");
+const crypto = require("crypto");
 
+const { serializeCookie } = require("../../../lib/server/cookies");
 const { methodNotAllowed } = require("../../../lib/server/http");
 
 const OAUTH_STATE_COOKIE = "windpetition_oauth_state";
@@ -38,9 +38,9 @@ module.exports = async function handler(req, res) {
       prompt: "consent",
     });
 
-    const stateCookie = cookie.serialize(OAUTH_STATE_COOKIE, state, {
+    const stateCookie = serializeCookie(OAUTH_STATE_COOKIE, state, {
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: "Lax",
       path: "/",
       secure: process.env.NODE_ENV === "production",
       maxAge: 60 * 10,
@@ -57,4 +57,3 @@ module.exports = async function handler(req, res) {
     res.end(JSON.stringify({ error: "Failed to start Discord OAuth" }));
   }
 };
-

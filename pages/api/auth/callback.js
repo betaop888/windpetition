@@ -1,11 +1,10 @@
-﻿const cookie = require("cookie");
-
 const {
   clearSessionCookie,
   createSession,
   createSessionCookie,
   parseCookies,
 } = require("../../../lib/server/auth");
+const { serializeCookie } = require("../../../lib/server/cookies");
 const { ensureSchema, sql } = require("../../../lib/server/db");
 const { methodNotAllowed } = require("../../../lib/server/http");
 
@@ -27,9 +26,9 @@ function resolveDiscordAvatar(discordUser) {
 }
 
 function clearOAuthStateCookie() {
-  return cookie.serialize(OAUTH_STATE_COOKIE, "", {
+  return serializeCookie(OAUTH_STATE_COOKIE, "", {
     httpOnly: true,
-    sameSite: "lax",
+    sameSite: "Lax",
     path: "/",
     secure: process.env.NODE_ENV === "production",
     maxAge: 0,
@@ -166,4 +165,3 @@ module.exports = async function handler(req, res) {
     res.end();
   }
 };
-
