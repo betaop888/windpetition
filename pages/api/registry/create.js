@@ -3,7 +3,40 @@ const { sql } = require("../../../lib/server/db");
 const { methodNotAllowed, readJsonBody, sendJson } = require("../../../lib/server/http");
 
 function normalizeText(value) {
-  return String(value || "").trim();
+  return String(value || "")
+    .replace(/\r\n?/g, "\n")
+    .trim();
+}
+
+function normalizeSingleLineText(value) {
+  return normalizeText(value).replace(/\s+/g, " ");
+}
+
+function normalizeMultilineText(value) {
+  const text = normalizeText(value);
+  if (!text) {
+    return "";
+  }
+
+  const lines = text.split("\n").map((line) => line.replace(/[ \t]+$/g, ""));
+  const normalizedLines = [];
+  let consecutiveEmptyLines = 0;
+
+  for (const line of lines) {
+    if (!line.trim()) {
+      if (consecutiveEmptyLines >= 1) {
+        continue;
+      }
+      normalizedLines.push("");
+      consecutiveEmptyLines += 1;
+      continue;
+    }
+
+    consecutiveEmptyLines = 0;
+    normalizedLines.push(line);
+  }
+
+  return normalizedLines.join("\n");
 }
 
 const handler = async function handler(req, res) {
@@ -23,10 +56,10 @@ const handler = async function handler(req, res) {
 
     const body = await readJsonBody(req);
 
-    const title = normalizeText(body.title);
-    const text = normalizeText(body.body);
+    const title = normalizeSingleLineText(body.title);
+    const text = normalizeMultilineText(body.body);
     const decision = body.decision === "accepted" ? "accepted" : body.decision === "rejected" ? "rejected" : null;
-    const reason = normalizeText(body.reason);
+    const reason = normalizeSingleLineText(body.reason);
 
     if (!title || title.length < 4 || title.length > 160) {
       return sendJson(res, 400, { error: "Title must be 4-160 characters" });
@@ -61,4 +94,3 @@ const handler = async function handler(req, res) {
 
 module.exports = handler;
 module.exports.default = handler;
-

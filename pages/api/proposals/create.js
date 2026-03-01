@@ -7,7 +7,40 @@ const PUBLIC_PROPOSAL_LIMIT = 2;
 const PUBLIC_PROPOSAL_LIMIT_WINDOW = "24 hours";
 
 function normalizeText(value) {
-  return String(value || "").trim();
+  return String(value || "")
+    .replace(/\r\n?/g, "\n")
+    .trim();
+}
+
+function normalizeSingleLineText(value) {
+  return normalizeText(value).replace(/\s+/g, " ");
+}
+
+function normalizeMultilineText(value) {
+  const text = normalizeText(value);
+  if (!text) {
+    return "";
+  }
+
+  const lines = text.split("\n").map((line) => line.replace(/[ \t]+$/g, ""));
+  const normalizedLines = [];
+  let consecutiveEmptyLines = 0;
+
+  for (const line of lines) {
+    if (!line.trim()) {
+      if (consecutiveEmptyLines >= 1) {
+        continue;
+      }
+      normalizedLines.push("");
+      consecutiveEmptyLines += 1;
+      continue;
+    }
+
+    consecutiveEmptyLines = 0;
+    normalizedLines.push(line);
+  }
+
+  return normalizedLines.join("\n");
 }
 
 const handler = async function handler(req, res) {
@@ -25,8 +58,8 @@ const handler = async function handler(req, res) {
 
     const scope = body.scope === "minister" ? "minister" : "public";
     const kind = body.kind === "law" ? "law" : "petition";
-    const title = normalizeText(body.title);
-    const description = normalizeText(body.description);
+    const title = normalizeSingleLineText(body.title);
+    const description = normalizeMultilineText(body.description);
     const deadlineAtRaw = normalizeText(body.deadlineAt);
 
     if (!title || title.length < 4 || title.length > 160) {

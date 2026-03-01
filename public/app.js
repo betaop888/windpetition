@@ -19,6 +19,55 @@ function escapeHtml(value) {
     .replace(/'/g, "&#39;");
 }
 
+function normalizeDisplayText(value, options = {}) {
+  const multiline = options.multiline !== false;
+  const source = String(value ?? "").replace(/\r\n?/g, "\n").trim();
+
+  if (!source) {
+    return "";
+  }
+
+  if (!multiline) {
+    return source.replace(/\s+/g, " ");
+  }
+
+  const lines = source.split("\n").map((line) => line.replace(/[ \t]+$/g, ""));
+  const normalizedLines = [];
+  let consecutiveEmptyLines = 0;
+
+  for (const line of lines) {
+    if (!line.trim()) {
+      if (consecutiveEmptyLines >= 1) {
+        continue;
+      }
+      normalizedLines.push("");
+      consecutiveEmptyLines += 1;
+      continue;
+    }
+
+    consecutiveEmptyLines = 0;
+    normalizedLines.push(line);
+  }
+
+  return normalizedLines.join("\n");
+}
+
+function proposalSkeletonTemplate(count = 4) {
+  return Array.from({ length: count })
+    .map(() => {
+      return `
+        <article class="petition-card skeleton-card" aria-hidden="true">
+          <div class="skeleton-line skeleton-line-avatar"></div>
+          <div class="skeleton-line skeleton-line-badge"></div>
+          <div class="skeleton-line skeleton-line-title"></div>
+          <div class="skeleton-line skeleton-line-text"></div>
+          <div class="skeleton-line skeleton-line-text short"></div>
+        </article>
+      `;
+    })
+    .join("");
+}
+
 function isAdmin(user = state.currentUser) {
   return Boolean(user && user.role === ROLE_ADMIN);
 }
@@ -679,6 +728,8 @@ function proposalCardTemplate(proposal) {
   const statusMeta = getStatusMeta(proposal);
   const showVotes = canSeeVoteTotals(proposal);
   const proposalCode = formatProposalId(proposal);
+  const safeTitle = normalizeDisplayText(proposal.title, { multiline: false });
+  const safeDescription = normalizeDisplayText(proposal.description);
 
   return `
     <a href="/petition-detail?id=${proposal.id}" class="petition-card">
@@ -691,8 +742,8 @@ function proposalCardTemplate(proposal) {
         <span class="mini-badge">${proposalKindLabel(proposal.kind)}</span>
         <span class="mini-badge">${proposal.scope === "minister" ? "Министры" : "Публично"}</span>
       </div>
-      <h3 class="petition-card-title">${escapeHtml(proposal.title)}</h3>
-      <p class="petition-card-description">${escapeHtml(proposal.description)}</p>
+      <h3 class="petition-card-title">${escapeHtml(safeTitle)}</h3>
+      <p class="petition-card-description">${escapeHtml(safeDescription)}</p>
       <div class="petition-card-meta">
         <div class="petition-card-status">
           <span class="status-indicator ${statusMeta.indicatorClass}"></span>
@@ -795,6 +846,8 @@ async function initProposalBoard(scope, options) {
     if (Array.isArray(cached)) {
       proposals = cached;
       render();
+    } else {
+      grid.innerHTML = proposalSkeletonTemplate(4);
     }
 
     const data = await api(`/api/proposals/list?scope=${scope}`);
@@ -1000,15 +1053,15 @@ async function initDetailPage() {
     const petitionKind = document.getElementById("petitionKind");
 
     if (titleElement) {
-      titleElement.textContent = proposal.title;
+      titleElement.textContent = normalizeDisplayText(proposal.title, { multiline: false });
     }
 
     if (breadcrumbTitle) {
-      breadcrumbTitle.textContent = proposal.title;
+      breadcrumbTitle.textContent = normalizeDisplayText(proposal.title, { multiline: false });
     }
 
     if (description) {
-      description.textContent = proposal.description;
+      description.textContent = normalizeDisplayText(proposal.description);
     }
 
     if (petitionDate) {
@@ -1325,8 +1378,12 @@ async function initProfilePage() {
 }
 
 function registryCardTemplate(entry) {
+  const safeTitle = normalizeDisplayText(entry.title, { multiline: false });
+  const safeBody = normalizeDisplayText(entry.body);
+  const safeReason = normalizeDisplayText(entry.reason, { multiline: false });
+
   return `
-    <article class="petition-card registry-card" data-entry-id="${entry.id}" tabindex="0" role="button" aria-label="Открыть запись «${escapeHtml(entry.title)}»">
+    <article class="petition-card registry-card" data-entry-id="${entry.id}" tabindex="0" role="button" aria-label="Открыть запись «${escapeHtml(safeTitle)}»">
       <div class="petition-card-header">
         <img src="${safeAvatar(entry.author.avatarUrl, 48)}" alt="${escapeHtml(entry.author.username)}" class="petition-card-icon">
         <div class="petition-card-owner">${escapeHtml(entry.author.username)}</div>
@@ -1336,9 +1393,9 @@ function registryCardTemplate(entry) {
           ${entry.decision === "accepted" ? "Принято" : "Отклонено"}
         </span>
       </div>
-      <h3 class="petition-card-title">${escapeHtml(entry.title)}</h3>
-      <p class="petition-card-description">${escapeHtml(entry.body)}</p>
-      ${entry.reason ? `<p class="registry-reason"><strong>Комментарий:</strong> ${escapeHtml(entry.reason)}</p>` : ""}
+      <h3 class="petition-card-title">${escapeHtml(safeTitle)}</h3>
+      <p class="petition-card-description">${escapeHtml(safeBody)}</p>
+      ${safeReason ? `<p class="registry-reason"><strong>Комментарий:</strong> ${escapeHtml(safeReason)}</p>` : ""}
       <div class="petition-card-meta">
         <span>${formatDateTime(entry.createdAt)}</span>
         <span class="registry-open-hint">Открыть полностью</span>
@@ -1385,7 +1442,7 @@ async function initRegistryPage() {
     activeEntryId = entryId;
 
     if (modalTitle) {
-      modalTitle.textContent = entry.title;
+      modalTitle.textContent = normalizeDisplayText(entry.title, { multiline: false });
     }
 
     if (modalDecision) {
@@ -1403,7 +1460,7 @@ async function initRegistryPage() {
     }
 
     if (modalBody) {
-      modalBody.textContent = entry.body;
+      modalBody.textContent = normalizeDisplayText(entry.body);
     }
 
     if (modalReasonRow) {
@@ -1411,7 +1468,7 @@ async function initRegistryPage() {
     }
 
     if (modalReason) {
-      modalReason.textContent = entry.reason || "";
+      modalReason.textContent = normalizeDisplayText(entry.reason || "", { multiline: false });
     }
 
     if (modalActions) {
@@ -1509,6 +1566,8 @@ async function initRegistryPage() {
       if (Array.isArray(cached) && cached.length > 0) {
         entriesById = new Map(cached.map((entry) => [entry.id, entry]));
         list.innerHTML = cached.map(registryCardTemplate).join("");
+      } else {
+        list.innerHTML = proposalSkeletonTemplate(3);
       }
 
       const data = await api("/api/registry/list");
@@ -1708,9 +1767,18 @@ async function bootstrap() {
   }
 
   const startNotificationsLoad = () => {
-    loadNotifications(true).catch((error) => {
-      console.error("Failed to load notifications", error);
-    });
+    const run = () => {
+      loadNotifications(true).catch((error) => {
+        console.error("Failed to load notifications", error);
+      });
+    };
+
+    if (typeof window.requestIdleCallback === "function") {
+      window.requestIdleCallback(run, { timeout: 1200 });
+      return;
+    }
+
+    setTimeout(run, 0);
   };
 
   if (!state.currentUser) {
