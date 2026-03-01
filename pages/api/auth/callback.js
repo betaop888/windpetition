@@ -1,4 +1,4 @@
-const {
+﻿const {
   clearSessionCookie,
   createSession,
   createSessionCookie,
@@ -184,4 +184,3 @@ const handler = async function handler(req, res) {
 
 module.exports = handler;
 module.exports.default = handler;
-

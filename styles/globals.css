@@ -57,7 +57,7 @@ body {
   color: #9fa8ba;
   text-decoration: none;
   font-size: 0.82rem;
-  transition: all 0.2s;
+  transition: all 0.22s ease;
   width: 100%;
   min-height: 46px;
   border: 1px solid transparent;
@@ -81,9 +81,10 @@ body {
 
 .nav-link:hover,
 .nav-link.active {
-  color: #4a9eff;
-  background: #0d2138;
-  border-color: #183961;
+  color: #d8e8ff;
+  background: linear-gradient(180deg, rgba(21, 39, 63, 0.95) 0%, rgba(16, 32, 52, 0.95) 100%);
+  border-color: #214877;
+  box-shadow: inset 0 1px 0 rgba(127, 179, 255, 0.18);
 }
 
 .nav-link.active::before {
@@ -101,16 +102,32 @@ body {
 }
 
 .nav-icon {
-  width: 20px;
-  height: 20px;
+  width: 28px;
+  height: 28px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  border-radius: 9px;
+  border: 1px solid #243145;
+  background: linear-gradient(180deg, #101824 0%, #0b121d 100%);
+  color: #acb9cd;
+  transition: all 0.22s ease;
 }
 
 .nav-icon svg {
-  width: 20px;
-  height: 20px;
+  width: 17px;
+  height: 17px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.nav-link:hover .nav-icon,
+.nav-link.active .nav-icon {
+  border-color: #3278c5;
+  background: linear-gradient(180deg, #1f3b61 0%, #15304f 100%);
+  color: #dbe9ff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(5, 12, 23, 0.35);
 }
 
 .nav-label {
@@ -1329,6 +1346,11 @@ body {
     min-height: 40px;
     min-width: 40px;
     padding: 0.2rem 0.45rem;
+  }
+
+  .nav-icon {
+    width: 26px;
+    height: 26px;
   }
 
   .nav-label {
