@@ -593,6 +593,71 @@ function hideAuthRequired() {
   }
 }
 
+function showVoteConfirmModal(voteText) {
+  const modal = document.getElementById("voteConfirmModal");
+  const text = document.getElementById("voteConfirmText");
+  const confirmButton = document.getElementById("voteConfirmSubmit");
+  const cancelButton = document.getElementById("voteConfirmCancel");
+
+  if (!modal || !text || !confirmButton || !cancelButton) {
+    const fallbackText = `Подтвердите выбор: «${voteText}». После отправки изменить голос нельзя.`;
+    return Promise.resolve(window.confirm(fallbackText));
+  }
+
+  text.textContent = `Вы выбрали: «${voteText}». После отправки изменить голос нельзя.`;
+  modal.classList.add("active");
+
+  return new Promise((resolve) => {
+    let resolved = false;
+
+    const cleanup = () => {
+      confirmButton.removeEventListener("click", onConfirm);
+      cancelButton.removeEventListener("click", onCancel);
+      modal.removeEventListener("click", onBackdropClick);
+      document.removeEventListener("keydown", onEscape);
+    };
+
+    const finish = (value) => {
+      if (resolved) {
+        return;
+      }
+
+      resolved = true;
+      modal.classList.remove("active");
+      cleanup();
+      resolve(value);
+    };
+
+    const onConfirm = (event) => {
+      event.preventDefault();
+      finish(true);
+    };
+
+    const onCancel = (event) => {
+      event.preventDefault();
+      finish(false);
+    };
+
+    const onBackdropClick = (event) => {
+      if (event.target === modal) {
+        finish(false);
+      }
+    };
+
+    const onEscape = (event) => {
+      if (event.key === "Escape") {
+        finish(false);
+      }
+    };
+
+    confirmButton.addEventListener("click", onConfirm);
+    cancelButton.addEventListener("click", onCancel);
+    modal.addEventListener("click", onBackdropClick);
+    document.addEventListener("keydown", onEscape);
+    confirmButton.focus();
+  });
+}
+
 function bindDiscordButtons() {
   const buttons = document.querySelectorAll(".discord-login-btn");
   buttons.forEach((button) => {
@@ -1007,9 +1072,7 @@ function updateVotingBlock(proposal) {
       }
 
       const voteText = voteLabel(voteValue);
-      const isConfirmed = window.confirm(
-        `Подтвердите выбор: «${voteText}». После отправки изменить голос нельзя.`
-      );
+      const isConfirmed = await showVoteConfirmModal(voteText);
       if (!isConfirmed) {
         return;
       }
