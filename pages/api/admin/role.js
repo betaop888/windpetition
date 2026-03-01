@@ -25,8 +25,8 @@ const handler = async function handler(req, res) {
       return sendJson(res, 400, { error: "Invalid user id" });
     }
 
-    if (!["citizen", "minister", "admin"].includes(targetRole)) {
-      return sendJson(res, 400, { error: "Role must be citizen, minister or admin" });
+    if (!["citizen", "chamber", "minister", "admin"].includes(targetRole)) {
+      return sendJson(res, 400, { error: "Role must be citizen, chamber, minister or admin" });
     }
 
     const targetResult = await sql`

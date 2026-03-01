@@ -29,7 +29,8 @@ const handler = async function handler(req, res) {
         CASE role
           WHEN 'admin' THEN 0
           WHEN 'minister' THEN 1
-          ELSE 2
+          WHEN 'chamber' THEN 2
+          ELSE 3
         END,
         username ASC
     `;

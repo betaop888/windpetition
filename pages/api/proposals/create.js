@@ -1,10 +1,10 @@
-const { getSessionUser, isMinister } = require("../../../lib/server/auth");
+﻿const { getSessionUser, isChamberMember, isMinister } = require("../../../lib/server/auth");
 const { ensureSchema, sql } = require("../../../lib/server/db");
 const { methodNotAllowed, readJsonBody, sendJson } = require("../../../lib/server/http");
 const { createNotificationsForUsers, findUserIdsByRoles } = require("../../../lib/server/notifications");
 
 const PUBLIC_PROPOSAL_LIMIT = 2;
-const PUBLIC_PROPOSAL_LIMIT_WINDOW = "24 hours";
+const PUBLIC_PROPOSAL_LIMIT_WINDOW = "24 часа";
 
 function normalizeText(value) {
   return String(value || "")
@@ -63,24 +63,30 @@ const handler = async function handler(req, res) {
     const deadlineAtRaw = normalizeText(body.deadlineAt);
 
     if (!title || title.length < 4 || title.length > 160) {
-      return sendJson(res, 400, { error: "Title must be 4-160 characters" });
+      return sendJson(res, 400, { error: "Заголовок должен быть от 4 до 160 символов" });
     }
 
     if (!description || description.length < 10 || description.length > 5000) {
-      return sendJson(res, 400, { error: "Description must be 10-5000 characters" });
+      return sendJson(res, 400, { error: "Описание должно быть от 10 до 5000 символов" });
     }
 
     const deadline = new Date(deadlineAtRaw);
     if (Number.isNaN(deadline.getTime())) {
-      return sendJson(res, 400, { error: "Invalid deadline date" });
+      return sendJson(res, 400, { error: "Некорректная дата дедлайна" });
     }
 
     if (deadline <= new Date()) {
-      return sendJson(res, 400, { error: "Deadline must be in the future" });
+      return sendJson(res, 400, { error: "Дедлайн должен быть в будущем" });
     }
 
     if (scope === "minister" && !isMinister(user)) {
-      return sendJson(res, 403, { error: "Only ministers can create minister proposals" });
+      return sendJson(res, 403, { error: "Для этого раздела нужны права министра" });
+    }
+
+    if (scope === "public" && kind === "law" && !isChamberMember(user)) {
+      return sendJson(res, 403, {
+        error: "Законопроекты в публичном разделе может создавать только член палаты или выше",
+      });
     }
 
     await ensureSchema();

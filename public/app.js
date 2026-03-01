@@ -1,4 +1,5 @@
 ﻿const ROLE_ADMIN = "admin";
+const ROLE_CHAMBER = "chamber";
 const ROLE_MINISTER = "minister";
 const ROLE_CITIZEN = "citizen";
 
@@ -76,6 +77,13 @@ function isMinister(user = state.currentUser) {
   return Boolean(user && (user.role === ROLE_MINISTER || user.role === ROLE_ADMIN));
 }
 
+function isChamberMember(user = state.currentUser) {
+  return Boolean(
+    user &&
+      (user.role === ROLE_CHAMBER || user.role === ROLE_MINISTER || user.role === ROLE_ADMIN)
+  );
+}
+
 function roleLabel(role) {
   if (role === ROLE_ADMIN) {
     return "администратор";
@@ -85,7 +93,59 @@ function roleLabel(role) {
     return "министр";
   }
 
+  if (role === ROLE_CHAMBER) {
+    return "член палаты";
+  }
+
   return "гражданин";
+}
+
+function roleTitle(role) {
+  const label = roleLabel(role);
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+function rolesForUser(user) {
+  const role = user?.role;
+
+  if (role === ROLE_ADMIN) {
+    return [ROLE_CITIZEN, ROLE_CHAMBER, ROLE_MINISTER, ROLE_ADMIN];
+  }
+
+  if (role === ROLE_MINISTER) {
+    return [ROLE_CITIZEN, ROLE_CHAMBER, ROLE_MINISTER];
+  }
+
+  if (role === ROLE_CHAMBER) {
+    return [ROLE_CITIZEN, ROLE_CHAMBER];
+  }
+
+  return [ROLE_CITIZEN];
+}
+
+function roleIconSvg(role) {
+  if (role === ROLE_ADMIN) {
+    return '<svg viewBox="0 0 20 20" fill="none"><path d="M10 2.5L15.5 4.8V8.9C15.5 12.45 13.55 15.08 10 16.15C6.45 15.08 4.5 12.45 4.5 8.9V4.8L10 2.5Z" stroke="currentColor" stroke-width="1.6"></path><path d="M10 6.2L10.6 7.45L12 7.65L11 8.65L11.25 10.05L10 9.4L8.75 10.05L9 8.65L8 7.65L9.4 7.45L10 6.2Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"></path></svg>';
+  }
+
+  if (role === ROLE_MINISTER) {
+    return '<svg viewBox="0 0 20 20" fill="none"><circle cx="7" cy="7.6" r="2" stroke="currentColor" stroke-width="1.6"></circle><circle cx="13" cy="7.6" r="2" stroke="currentColor" stroke-width="1.6"></circle><path d="M3.9 15.5C4.3 13.35 5.6 12 7 12C8.4 12 9.7 13.35 10.1 15.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path><path d="M9.9 15.5C10.3 13.35 11.6 12 13 12C14.4 12 15.7 13.35 16.1 15.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>';
+  }
+
+  if (role === ROLE_CHAMBER) {
+    return '<svg viewBox="0 0 20 20" fill="none"><path d="M4.4 4.4H15.6V15.6H4.4V4.4Z" stroke="currentColor" stroke-width="1.6"></path><path d="M7 7.2H13M7 10H13M7 12.8H11.2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>';
+  }
+
+  return '<svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="6.8" r="2.35" stroke="currentColor" stroke-width="1.6"></circle><path d="M5 15.4C5.45 12.85 7.15 11.3 10 11.3C12.85 11.3 14.55 12.85 15 15.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>';
+}
+
+function roleBadgeTemplate(role) {
+  return `
+    <span class="role-chip role-${role}">
+      <span class="role-chip-icon" aria-hidden="true">${roleIconSvg(role)}</span>
+      <span>${escapeHtml(roleTitle(role))}</span>
+    </span>
+  `;
 }
 
 function proposalKindLabel(kind) {
@@ -1270,6 +1330,7 @@ async function initCreatePage() {
   const cancelButton = document.getElementById("cancelCreateBtn");
   const submitButton = document.getElementById("submitCreateBtn");
   const deadlineInput = document.getElementById("proposalDeadline");
+  const proposalTypeSelect = document.getElementById("proposalType");
   const resultRuleText = document.getElementById("resultRuleText");
   const creationLimitText = document.getElementById("creationLimitText");
   const creationLimitTitle = document.getElementById("creationLimitTitle");
@@ -1300,7 +1361,25 @@ async function initCreatePage() {
     creationLimitText.textContent =
       scope === "minister"
         ? "Раздел предназначен для министерских инициатив. Голосование проводится среди министров."
-        : "С одного аккаунта можно создать до 2 публичных голосований за 24 часа.";
+        : isChamberMember()
+          ? "С одного аккаунта можно создать до 2 публичных голосований за 24 часа. Вы можете публиковать петиции и законопроекты."
+          : "С одного аккаунта можно создать до 2 публичных голосований за 24 часа. Для законопроектов нужна роль «член палаты».";
+  }
+
+  if (proposalTypeSelect && scope === "public") {
+    const lawOption = proposalTypeSelect.querySelector('option[value=\"law\"]');
+    if (lawOption) {
+      lawOption.disabled = !isChamberMember();
+      if (!isChamberMember()) {
+        lawOption.textContent = "Законопроект (нужна роль члена палаты)";
+      } else {
+        lawOption.textContent = "Законопроект";
+      }
+    }
+
+    if (!isChamberMember() && proposalTypeSelect.value === "law") {
+      proposalTypeSelect.value = "petition";
+    }
   }
 
   if (deadlineInput) {
@@ -1327,6 +1406,11 @@ async function initCreatePage() {
     const title = document.getElementById("proposalTitle")?.value || "";
     const description = document.getElementById("proposalDescription")?.value || "";
     const deadlineRaw = document.getElementById("proposalDeadline")?.value || "";
+
+    if (scope === "public" && kind === "law" && !isChamberMember()) {
+      alert("Для создания законопроекта нужна роль «член палаты».");
+      return;
+    }
 
     if (!deadlineRaw) {
       alert("Укажите дедлайн голосования.");
@@ -1370,6 +1454,7 @@ async function initProfilePage() {
   const breadcrumbUsername = document.getElementById("breadcrumbUsername");
   const profileAvatar = document.getElementById("profileAvatar");
   const profileRoleLabel = document.getElementById("profileRoleLabel");
+  const profileRolesList = document.getElementById("profileRolesList");
   const userPetitionsCount = document.getElementById("userPetitionsCount");
   const userPetitionsList = document.getElementById("userPetitionsList");
   const profileTab = document.querySelector(".profile-tab");
@@ -1412,8 +1497,14 @@ async function initProfilePage() {
     profileAvatar.src = safeAvatar(profileUser.avatarUrl, 300);
   }
 
+  const profileRoles = rolesForUser(profileUser);
+
   if (profileRoleLabel) {
-    profileRoleLabel.textContent = `Роль: ${roleLabel(profileUser.role)}`;
+    profileRoleLabel.textContent = profileRoles.length > 1 ? "Роли пользователя" : "Роль пользователя";
+  }
+
+  if (profileRolesList) {
+    profileRolesList.innerHTML = profileRoles.map(roleBadgeTemplate).join("");
   }
 
   if (profileTab) {
@@ -1706,6 +1797,7 @@ function adminUserCardTemplate(user) {
     ? '<option value="admin" selected>Администратор</option>'
     : `
         <option value="citizen" ${user.role === "citizen" ? "selected" : ""}>Гражданин</option>
+        <option value="chamber" ${user.role === "chamber" ? "selected" : ""}>Член палаты</option>
         <option value="minister" ${user.role === "minister" ? "selected" : ""}>Министр</option>
         <option value="admin" ${user.role === "admin" ? "selected" : ""}>Администратор</option>
       `;

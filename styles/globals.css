@@ -56,7 +56,8 @@ body {
 .nav-link {
   color: #9fa8ba;
   text-decoration: none;
-  font-size: 0.82rem;
+  font-size: 0;
+  line-height: 0;
   transition: all 0.22s ease;
   width: 52px;
   height: 52px;
@@ -79,9 +80,9 @@ body {
 .nav-link:hover,
 .nav-link.active {
   color: #d8e8ff;
-  background: linear-gradient(180deg, rgba(21, 39, 63, 0.95) 0%, rgba(16, 32, 52, 0.95) 100%);
-  border-color: #214877;
-  box-shadow: inset 0 1px 0 rgba(127, 179, 255, 0.18);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
 }
 
 .nav-user {
@@ -117,10 +118,10 @@ body {
 .nav-link:hover .nav-icon,
 .nav-link.active .nav-icon {
   border-color: #3278c5;
-  background: linear-gradient(180deg, #1f3b61 0%, #15304f 100%);
+  background: linear-gradient(180deg, #101824 0%, #0b121d 100%);
   color: #dbe9ff;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 12px rgba(5, 12, 23, 0.35);
+  transform: none;
+  box-shadow: none;
 }
 
 .nav-label {
@@ -496,17 +497,19 @@ body {
 
 .search-bar input {
   width: 100%;
-  padding: 1rem;
-  background-color: #1a1a1a;
-  border: 1px solid #2a2a2a;
-  border-radius: 8px;
-  color: #fff;
+  padding: 0.9rem 1rem;
+  background: linear-gradient(180deg, #0f1520 0%, #0b111a 100%);
+  border: 1px solid #2a3a52;
+  border-radius: 12px;
+  color: #f0f4fb;
   font-size: 1rem;
+  transition: all 0.2s ease;
 }
 
 .search-bar input:focus {
   outline: none;
-  border-color: #4a9eff;
+  border-color: #5aa8ff;
+  box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.14);
 }
 
 /* Petitions Grid */
@@ -743,29 +746,49 @@ body {
 }
 
 .form-group input,
-.form-group textarea {
+.form-group textarea,
+.form-group select {
   width: 100%;
-  padding: 0.78rem 0.88rem;
-  background-color: #0b0f15;
-  border: 1px solid #253149;
-  border-radius: 9px;
-  color: #f3f5fa;
+  padding: 0.82rem 0.94rem;
+  background: linear-gradient(180deg, #0f1724 0%, #0c131e 100%);
+  border: 1px solid #2d405f;
+  border-radius: 11px;
+  color: #f3f7ff;
   font-size: 0.95rem;
   font-family: inherit;
-  transition: all 0.2s;
+  transition: all 0.18s ease;
 }
 
 .form-group input:focus,
-.form-group textarea:focus {
+.form-group textarea:focus,
+.form-group select:focus {
   outline: none;
-  border-color: #4a9eff;
-  background-color: #101827;
-  box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
+  border-color: #63afff;
+  background: linear-gradient(180deg, #121d2b 0%, #0f1824 100%);
+  box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.15);
 }
 
 .form-group input::placeholder,
-.form-group textarea::placeholder {
-  color: #555;
+.form-group textarea::placeholder,
+.form-group select::placeholder {
+  color: #6f7f9a;
+}
+
+.form-group textarea {
+  min-height: 152px;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.form-group input:disabled,
+.form-group textarea:disabled,
+.form-group select:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+}
+
+.form-group input[type="datetime-local"] {
+  color-scheme: dark;
 }
 
 .form-group small {
@@ -977,11 +1000,11 @@ body {
 }
 
 .petition-form {
-  background: linear-gradient(145deg, #0d131d 0%, #131a27 100%);
-  border: 1px solid #243349;
-  border-radius: 16px;
-  padding: 1.55rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  background: linear-gradient(160deg, #0f1723 0%, #121b29 50%, #0d151f 100%);
+  border: 1px solid #2a3d58;
+  border-radius: 18px;
+  padding: 1.65rem;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.33);
 }
 
 .form-row {
@@ -1486,22 +1509,14 @@ body {
 }
 
 .form-group select {
-  width: 100%;
-  padding: 0.78rem 0.88rem;
-  background-color: #0b0f15;
-  border: 1px solid #253149;
-  border-radius: 9px;
-  color: #fff;
-  font-size: 0.95rem;
-  font-family: inherit;
-  transition: all 0.2s;
-}
-
-.form-group select:focus {
-  outline: none;
-  border-color: #4a9eff;
-  background-color: #101827;
-  box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.1);
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, #7da6dc 50%), linear-gradient(135deg, #7da6dc 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) calc(50% - 3px),
+    calc(100% - 12px) calc(50% - 3px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 2.3rem;
 }
 
 .card-badges {
@@ -1731,6 +1746,61 @@ body {
 
 .profile-role {
   margin-top: 1rem;
+  margin-bottom: 0.7rem;
+}
+
+.profile-roles-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.role-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  padding: 0.32rem 0.68rem;
+  border-radius: 999px;
+  border: 1px solid #2a3a52;
+  background: #0f1622;
+  color: #d2deee;
+  font-size: 0.78rem;
+  line-height: 1;
+}
+
+.role-chip-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.role-chip-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.role-admin {
+  border-color: #5a4a20;
+  color: #f2d590;
+  background: #171208;
+}
+
+.role-minister {
+  border-color: #2f4d74;
+  color: #a8cdfa;
+}
+
+.role-chamber {
+  border-color: #36533a;
+  color: #bde8c3;
+}
+
+.role-citizen {
+  border-color: #334055;
+  color: #c4cfdf;
 }
 
 .admin-toolbar {
