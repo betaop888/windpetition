@@ -5,13 +5,7 @@ GET
 windpetition.vercel.app
 /api/auth/callback
 
-windpetition.vercel.app
-/
-Mar 02 16:13:52.24
-GET
----
-windpetition-57g81c3sh-dimas-projects-399791a4.vercel.app
-/api/auth/me
+windpetiti
 Mar 02 16:13:52.21
 GET
 200
