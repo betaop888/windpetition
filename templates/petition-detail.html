@@ -1,0 +1,187 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wind Petition - Голосование</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="detail">
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <path d="M20 5L5 15V25L20 35L35 25V15L20 5Z" stroke="white" stroke-width="2" fill="none"></path>
+        </svg>
+      </div>
+      <div class="nav-links">
+        <a href="/" class="nav-link">Главная</a>
+        <a href="/minister" class="nav-link" id="ministerNavLink" style="display: none;">Голосования министров</a>
+        <a href="/registry" class="nav-link">Реестр</a>
+        <a href="/admin" class="nav-link" id="adminNavLink" style="display: none;">Админка</a>
+        <a href="/#petitions" class="nav-link">Голосования</a>
+      </div>
+      <div class="nav-user">
+        <button class="notification-btn" type="button" aria-label="Уведомления">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 2C8.34 2 7 3.34 7 5V5.29C5.19 6.08 4 7.86 4 10V14L2 16V17H18V16L16 14V10C16 7.86 14.81 6.08 13 5.29V5C13 3.34 11.66 2 10 2ZM10 20C11.1 20 12 19.1 12 18H8C8 19.1 8.9 20 10 20Z"></path>
+          </svg>
+        </button>
+        <div class="user-menu">
+          <img src="/placeholder.svg?height=40&width=40" alt="Пользователь" class="user-avatar" id="userAvatar">
+          <div class="user-dropdown" id="userDropdown">
+            <div class="dropdown-content">
+              <div class="dropdown-user-info" id="dropdownUserInfo">
+                <img src="/placeholder.svg?height=40&width=40" alt="Пользователь" class="dropdown-avatar" id="dropdownAvatar">
+                <div>
+                  <div class="dropdown-username" id="dropdownUsername">Гость</div>
+                  <a href="/profile" class="dropdown-profile-link">Открыть профиль</a>
+                </div>
+              </div>
+              <button class="btn btn-primary btn-full discord-login-btn" id="discordLoginBtnDropdown" style="display: none;">Войти через Discord</button>
+              <button class="dropdown-logout" id="logoutBtn" style="display: none;">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+                  <path d="M6 2H2V14H6V12H4V4H6V2ZM11.5 8L8 4.5V7H4V9H8V11.5L11.5 8Z"></path>
+                </svg>
+                Выйти из аккаунта
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main-content">
+    <div class="breadcrumb">
+      <a href="/">Главная</a>
+      <span>›</span>
+      <span id="breadcrumbTitle">Голосование</span>
+    </div>
+
+    <div class="petition-detail-container">
+      <div class="petition-detail-main">
+        <div class="petition-detail-header">
+          <h1 class="petition-detail-title" id="petitionTitle">Загрузка...</h1>
+          <div class="petition-detail-meta">
+            <span class="petition-status" id="petitionStatus">Активно</span>
+            <span class="petition-code" id="petitionCode">ID: 0000</span>
+            <span class="petition-date" id="petitionDate"></span>
+          </div>
+        </div>
+
+        <div class="petition-detail-description" id="petitionDescription">Загрузка описания...</div>
+
+        <div class="petition-voting">
+          <h3>Ваш голос</h3>
+          <div class="voting-buttons" id="votingButtons">
+            <button class="vote-btn vote-for" data-vote="for" type="button">
+              <svg width="34" height="34" viewBox="0 0 36 36" fill="none" class="vote-icon">
+                <circle cx="18" cy="18" r="12.5" fill="rgba(74,222,128,0.12)" stroke="#4ade80" stroke-width="2.4"></circle>
+                <path d="M12 18.5L16 22.5L24 14.5" stroke="#4ade80" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+              <span>За</span>
+            </button>
+            <button class="vote-btn vote-against" data-vote="against" type="button">
+              <svg width="34" height="34" viewBox="0 0 36 36" fill="none" class="vote-icon">
+                <circle cx="18" cy="18" r="12.5" fill="rgba(239,68,68,0.12)" stroke="#ef4444" stroke-width="2.4"></circle>
+                <path d="M13 13L23 23M23 13L13 23" stroke="#ef4444" stroke-width="2.8" stroke-linecap="round"></path>
+              </svg>
+              <span>Против</span>
+            </button>
+            <button class="vote-btn vote-abstain" data-vote="abstain" type="button">
+              <svg width="34" height="34" viewBox="0 0 36 36" fill="none" class="vote-icon">
+                <circle cx="18" cy="18" r="12.5" fill="rgba(251,191,36,0.12)" stroke="#fbbf24" stroke-width="2.4"></circle>
+                <path d="M14 18H22" stroke="#fbbf24" stroke-width="2.8" stroke-linecap="round"></path>
+              </svg>
+              <span>Воздержаться</span>
+            </button>
+          </div>
+          <div class="vote-message" id="voteMessage"></div>
+        </div>
+
+        <div class="petition-stats">
+          <div class="stat-bar tri-stat-bar">
+            <div class="stat-segment stat-segment-for" id="statBarFor"></div>
+            <div class="stat-segment stat-segment-against" id="statBarAgainst"></div>
+            <div class="stat-segment stat-segment-abstain" id="statBarAbstain"></div>
+          </div>
+          <div class="results-hidden-notice" id="resultsHiddenNotice" style="display: none;">
+            Результаты скрыты до завершения периода голосования.
+          </div>
+          <div class="stat-numbers three-way-stats" id="voteCountBlock">
+            <span class="stat-for">За: <span id="forCount">0</span></span>
+            <span class="stat-against">Против: <span id="againstCount">0</span></span>
+            <span class="stat-abstain">Воздерж.: <span id="abstainCount">0</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="petition-detail-sidebar">
+        <div class="sidebar-section">
+          <h3>Автор</h3>
+          <div class="user-item">
+            <img src="/placeholder.svg?height=40&width=40" alt="Автор" class="user-item-avatar" id="petitionOwnerAvatar">
+            <span class="user-item-name" id="petitionOwner">Username</span>
+          </div>
+          <div class="meta-chip" id="petitionKind">Петиция</div>
+        </div>
+
+        <div class="sidebar-section" id="adminVotersSection">
+          <h3>Детали голосования</h3>
+          <div class="voters-block">
+            <h4>За <span class="count" id="votersForCount">0</span></h4>
+            <div class="voters-list" id="votersForList">
+              <p class="empty-message compact-empty">Нет голосов</p>
+            </div>
+          </div>
+          <div class="voters-block">
+            <h4>Против <span class="count" id="votersAgainstCount">0</span></h4>
+            <div class="voters-list" id="votersAgainstList">
+              <p class="empty-message compact-empty">Нет голосов</p>
+            </div>
+          </div>
+          <div class="voters-block">
+            <h4>Воздержались <span class="count" id="votersAbstainCount">0</span></h4>
+            <div class="voters-list" id="votersAbstainList">
+              <p class="empty-message compact-empty">Нет голосов</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-section" id="anonymousNoticeSection" style="display: none;">
+          <h3>Анонимность</h3>
+          <p class="page-subtitle">Голоса пользователей отображаются анонимно.</p>
+        </div>
+
+        <div class="sidebar-section" id="adminActionsSection" style="display: none;">
+          <h3>Действия администратора</h3>
+          <button class="btn btn-danger btn-full" id="deleteProposalBtn" type="button">Удалить голосование</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal" id="authModal">
+    <div class="modal-content">
+      <h2 class="modal-title">Требуется вход</h2>
+      <p class="modal-text" id="authRequiredText">Для работы с сайтом войдите через Discord.</p>
+      <button class="btn btn-primary btn-full discord-login-btn" id="discordLoginBtn">Войти через Discord</button>
+    </div>
+  </div>
+
+  <div class="modal" id="voteConfirmModal">
+    <div class="modal-content confirm-modal-content">
+      <h2 class="modal-title">Подтвердите голос</h2>
+      <p class="modal-text" id="voteConfirmText">После отправки голос изменить нельзя.</p>
+      <div class="form-actions confirm-modal-actions">
+        <button class="btn btn-secondary" type="button" id="voteConfirmCancel">Отмена</button>
+        <button class="btn btn-primary" type="button" id="voteConfirmSubmit">Подтвердить</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+

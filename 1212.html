@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>demo lockscreen (safe)</title>
+  <style>
+    :root{
+      --bg1:#0b1020;
+      --bg2:#111827;
+      --accent:#60a5fa;
+      --danger:#ef4444;
+      --ok:#22c55e;
+      --panel: rgba(17,24,39,.72);
+      --border: rgba(255,255,255,.10);
+    }
+    html, body { height: 100%; margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; background: radial-gradient(1200px 600px at 30% 20%, #1f2a52 0%, transparent 60%), linear-gradient(135deg,var(--bg1),var(--bg2)); color:#e5e7eb; }
+    .overlay{
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(6px);
+      z-index: 9999;
+    }
+    .card{
+      width: min(560px, 100%);
+      border: 1px solid var(--border);
+      background: var(--panel);
+      border-radius: 18px;
+      box-shadow: 0 30px 80px rgba(0,0,0,.55);
+      padding: 22px 22px 18px;
+    }
+    .title{
+      display:flex; align-items:center; gap:10px;
+      font-size: 18px; font-weight: 700;
+      letter-spacing: .2px;
+    }
+    .badge{
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.06);
+    }
+    .desc{
+      margin: 10px 0 18px;
+      line-height: 1.45;
+      color: rgba(229,231,235,.9);
+      font-size: 14px;
+    }
+    .row{ display:flex; gap:10px; }
+    input{
+      flex: 1;
+      height: 44px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,.25);
+      color: #e5e7eb;
+      padding: 0 12px;
+      font-size: 16px;
+      outline: none;
+    }
+    input:focus{ border-color: rgba(96,165,250,.55); box-shadow: 0 0 0 4px rgba(96,165,250,.12); }
+    button{
+      height: 44px;
+      padding: 0 14px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.08);
+      color: #e5e7eb;
+      font-weight: 650;
+      cursor: pointer;
+    }
+    button:hover{ background: rgba(255,255,255,.12); }
+    .msg{
+      margin-top: 12px;
+      font-size: 13px;
+      color: rgba(229,231,235,.85);
+      min-height: 18px;
+    }
+    .msg.bad{ color: #fecaca; }
+    .msg.ok{ color: #bbf7d0; }
+    .footer{
+      display:flex; justify-content: space-between; align-items:center;
+      margin-top: 16px; gap: 12px; flex-wrap: wrap;
+      color: rgba(229,231,235,.75);
+      font-size: 12px;
+    }
+    .exit{
+      display:flex; gap:10px; align-items:center; flex-wrap: wrap;
+    }
+    .exit button{
+      background: rgba(239,68,68,.10);
+      border-color: rgba(239,68,68,.25);
+    }
+    .exit button:hover{ background: rgba(239,68,68,.16); }
+    kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      padding: 2px 6px; border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.06);
+      color: rgba(229,231,235,.95);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- безопасная имитация: это просто оверлей в браузере -->
+  <div class="overlay" id="overlay" aria-modal="true" role="dialog">
+    <div class="card">
+      <div class="title">
+        демонстрация “лок-скрина” <span class="badge">safe demo</span>
+      </div>
+
+      <div class="desc">
+        это учебный пример для кибербезопасности: экран “заблокирован” только внутри вкладки браузера.
+        для разблокировки введите код <b>111</b>.
+      </div>
+
+      <div class="row">
+        <input id="code" inputmode="numeric" autocomplete="off" placeholder="введите код…" />
+        <button id="unlock">разблокировать</button>
+      </div>
+
+      <div class="msg" id="msg"></div>
+
+      <div class="footer">
+        <div class="exit">
+          аварийный выход: <kbd>esc</kbd> или
+          <button id="exit">выйти из демо</button>
+        </div>
+        <div>подсказка: нажмите “f11” чтобы включить полноэкранный режим браузера</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const overlay = document.getElementById('overlay');
+    const input = document.getElementById('code');
+    const msg = document.getElementById('msg');
+    const unlockBtn = document.getElementById('unlock');
+    const exitBtn = document.getElementById('exit');
+
+    const PASS = "111"; // учебный код
+
+    function setMessage(text, ok=false){
+      msg.textContent = text;
+      msg.className = "msg " + (ok ? "ok" : "bad");
+      if(!text) msg.className = "msg";
+    }
+
+    function unlock(){
+      const v = (input.value || "").trim();
+      if(v === PASS){
+        setMessage("верно. экран разблокирован.", true);
+        overlay.style.display = "none";
+      } else {
+        setMessage("неверный код.");
+        input.select();
+      }
+    }
+
+    function exitDemo(){
+      // безопасный аварийный выход
+      overlay.style.display = "none";
+      setMessage("");
+    }
+
+    unlockBtn.addEventListener('click', unlock);
+    input.addEventListener('keydown', (e) => {
+      if(e.key === "Enter") unlock();
+      if(e.key === "Escape") exitDemo();
+    });
+    exitBtn.addEventListener('click', exitDemo);
+
+    document.addEventListener('keydown', (e) => {
+      if(e.key === "Escape") exitDemo();
+    });
+
+    // фокус сразу в поле
+    setTimeout(() => input.focus(), 50);
+  </script>
+</body>
+</html>

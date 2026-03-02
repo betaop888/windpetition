@@ -1,0 +1,189 @@
+
+Mar 02 16:14:22.61
+GET
+---
+windpetition.vercel.app
+/api/auth/callback
+Discord callback failed Error: Token exchange failed with status 401 at p (/var/task/.next/server/pages/api/auth/callback.js:116:1300) at process.processTicksAndRejections (node:internal/process/task_queues:103:5) at async K (/var/task/node_modules/next/dist/compiled/next-server/pages-api.runtime.prod.js:20:16881) at async U.render (/var/task/node_modules/next/dist/compiled/next-server/pages-api.runtime.prod.js:20:17520) at async r9.runApi (/var/task/node_modules/next/dist/compiled/next-server/server.runtime.prod.js:17:44515) at async r9.handleCatchallRenderRequest (/var/task/node_modules/next/dist/compiled/next-server/server.runtime.prod.js:17:38432) at async r9.runImpl (/var/task/node_modules/next/dist/compiled/next-server/server.runtime.prod.js:16:17452) at async r9.handleRequestImpl (/var/task/node_modules/next/dist/compiled/next-server/server.runtime.prod.js:16:16541) at async Object.handler (/var/task/___next_launcher.cjs:57:3) at async Server.r (/opt/rust/nodejs.js:2:15572)
+Mar 02 16:14:18.35
+GET
+302
+windpetition.vercel.app
+/api/auth/discord
+Mar 02 16:14:15.69
+GET
+200
+windpetition.vercel.app
+/api/auth/me
+Mar 02 16:14:14.73
+GET
+200
+windpetition.vercel.app
+/
+Mar 02 16:13:52.24
+GET
+---
+windpetition-57g81c3sh-dimas-projects-399791a4.vercel.app
+/api/auth/me
+Mar 02 16:13:52.21
+GET
+200
+windpetition-57g81c3sh-dimas-projects-399791a4.vercel.app
+/api/auth/me
+Mar 02 16:13:51.87
+GET
+200
+windpetition-57g81c3sh-dimas-projects-399791a4.vercel.app
+/
+Mar 02 16:13:51.87
+GET
+200
+windpetition-57g81c3sh-dimas-projects-399791a4.vercel.app
+/
+Mar 02 16:13:51.44
+GET
+200
+windpetition-57g81c3sh-dimas-projects-399791a4.vercel.app
+/
+Mar 02 16:13:24.82
+GET
+200
+windpetition-gozieoysz-dimas-projects-399791a4.vercel.app
+/
+Mar 02 15:57:24.20
+GET
+200
+windpetition.vercel.app
+/api/auth/me
+Mar 02 15:57:24.04
+GET
+200
+windpetition.vercel.app
+/
+Mar 02 15:57:23.61
+GET
+302
+windpetition.vercel.app
+/api/auth/callback
+Discord callback failed Error: Token exchange failed with status 401 at p (/var/task/.next/server/pages/api/auth/callback.js:116:1300) at process.processTicksAndRejections (node:internal/process/task_queues:103:5) at async K (/var/task/node_modules/next/dist/compiled/next-server/pages-api.runtime.prod.js:20:16881) at async U.render (/var/task/node_modules/next/dist/compiled/next-server/pages-api.runtime.prod.js:20:17520) at async r9.runApi (/var/task/node_modules/next/dist/compiled/next-server/server.runtime.prod.js:17:44515) at async r9.handleCatchallRenderRequest (/var/task/node_modules/next/dist/compiled/next-server/server.runtime.prod.js:17:38432) at async r9.runImpl (/var/task/node_modules/next/dist/compiled/next-server/server.runtime.prod.js:16:17452) at async r9.handleRequestImpl (/var/task/node_modules/next/dist/compiled/next-server/server.runtime.prod.js:16:16541) at async Object.handler (/var/task/___next_launcher.cjs:57:3) at async Server.r (/opt/rust/nodejs.js:2:15572)
+Mar 02 15:57:19.13
+GET
+302
+windpetition.vercel.app
+/api/auth/discord
+Mar 02 15:57:18.24
+GET
+200
+windpetition.vercel.app
+/api/auth/me
+Mar 02 15:57:17.86
+GET
+200
+windpetition.vercel.app
+/
+Mar 02 15:57:12.89
+GET
+200
+windpetition.vercel.app
+/api/auth/me
+Mar 02 15:57:11.80
+GET
+200
+windpetition.vercel.app
+/
+Mar 02 15:56:48.93
+GET
+200
+windpetition-gozieoysz-dimas-projects-399791a4.vercel.app
+/api/auth/me
+Mar 02 15:56:48.70
+GET
+200
+windpetition-gozieoysz-dimas-projects-399791a4.vercel.app
+/api/auth/me
+Mar 02 15:56:48.48
+GET
+200
+windpetition-gozieoysz-dimas-projects-399791a4.vercel.app
+/
+Mar 02 15:56:48.46
+GET
+200
+windpetition-gozieoysz-dimas-projects-399791a4.vercel.app
+/
+Mar 02 15:56:48.26
+GET
+200
+windpetition-gozieoysz-dimas-projects-399791a4.vercel.app
+/
+Mar 02 15:55:47.33
+GET
+200
+windpetition-mfmvnfkic-dimas-projects-399791a4.vercel.app
+/api/auth/me
+Mar 02 15:55:47.32
+GET
+---
+windpetition-mfmvnfkic-dimas-projects-399791a4.vercel.app
+/api/auth/me
+Mar 02 15:55:47.04
+GET
+200
+windpetition-mfmvnfkic-dimas-projects-399791a4.vercel.app
+/
+Mar 02 15:55:47.02
+GET
+200
+windpetition-mfmvnfkic-dimas-projects-399791a4.vercel.app
+/
+Mar 02 15:55:46.66
+GET
+200
+windpetition-mfmvnfkic-dimas-projects-399791a4.vercel.app
+/
+Mar 02 15:47:54.57
+GET
+200
+windpetition.vercel.app
+/api/auth/me
+Mar 02 15:47:53.53
+GET
+304
+windpetition.vercel.app
+/
+Mar 02 15:47:53.21
+GET
+302
+windpetition.vercel.app
+/api/auth/callback
+Discord callback failed Error: Token exchange failed with status 401 at p (/var/task/.next/server/pages/api/auth/callback.js:116:1300) at process.processTicksAndRejections (node:internal/process/task_queues:103:5) at async K (/var/task/node_modules/next/dist/compiled/next-server/pages-api.runtime.prod.js:20:16881) at async U.render (/var/task/node_modules/next/dist/compiled/next-server/pages-api.runtime.prod.js:20:17520) at async r9.runApi (/var/task/node_modules/next/dist/compiled/next-server/server.runtime.prod.js:17:44515) at async r9.handleCatchallRenderRequest (/var/task/node_modules/next/dist/compiled/next-server/server.runtime.prod.js:17:38432) at async r9.runImpl (/var/task/node_modules/next/dist/compiled/next-server/server.runtime.prod.js:16:17452) at async r9.handleRequestImpl (/var/task/node_modules/next/dist/compiled/next-server/server.runtime.prod.js:16:16541) at async Object.handler (/var/task/___next_launcher.cjs:57:3) at async Server.r (/opt/rust/nodejs.js:2:15572)
+Mar 02 15:47:48.84
+GET
+302
+windpetition.vercel.app
+/api/auth/discord
+Mar 02 15:47:46.16
+GET
+200
+windpetition.vercel.app
+/api/auth/me
+Mar 02 15:47:45.23
+GET
+200
+windpetition.vercel.app
+/
+Mar 02 15:46:07.06
+GET
+200
+windpetition.vercel.app
+/api/auth/me
+Mar 02 15:46:06.18
+GET
+200
+windpetition.vercel.app
+/
+Mar 02 15:46:04.95
+GET
+302
+windpetition.vercel.app
+/api/auth/callback

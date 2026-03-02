@@ -1,0 +1,1928 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #000000;
+  color: #ffffff;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* Navbar */
+.navbar {
+  background: linear-gradient(180deg, #090b10 0%, #05070a 100%);
+  border-right: 1px solid #171a21;
+  width: 88px;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1200;
+}
+
+.nav-container {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0.9rem 0.65rem;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 0.9rem;
+}
+
+.nav-logo svg {
+  display: block;
+  margin: 0 auto;
+  width: 30px;
+  height: 30px;
+  opacity: 0.95;
+}
+
+.nav-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.42rem;
+  align-items: center;
+  flex: 1;
+  margin-top: 0.5rem;
+}
+
+.nav-link {
+  color: #9fa8ba;
+  text-decoration: none;
+  font-size: 0;
+  line-height: 0;
+  transition: all 0.22s ease;
+  width: 52px;
+  height: 52px;
+  min-height: 52px;
+  min-width: 52px;
+  margin: 0 auto;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.nav-link::before {
+  display: none;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: #d8e8ff;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.nav-user {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: auto;
+  position: relative;
+  padding-bottom: 0.35rem;
+}
+
+.nav-icon {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  border: 1px solid #243145;
+  background: linear-gradient(180deg, #101824 0%, #0b121d 100%);
+  color: #acb9cd;
+  transition: all 0.22s ease;
+}
+
+.nav-icon svg {
+  width: 17px;
+  height: 17px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.nav-link:hover .nav-icon,
+.nav-link.active .nav-icon {
+  border-color: #3278c5;
+  background: linear-gradient(180deg, #101824 0%, #0b121d 100%);
+  color: #dbe9ff;
+  transform: none;
+  box-shadow: none;
+}
+
+.nav-label {
+  position: absolute;
+  left: calc(100% + 14px);
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0.36rem 0.52rem;
+  border-radius: 6px;
+  border: 1px solid #2a3344;
+  background: #101724;
+  color: #c9d6ea;
+  font-size: 0.78rem;
+  line-height: 1.2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.nav-link:hover .nav-label {
+  opacity: 1;
+}
+
+.notification-btn {
+  background: #101521;
+  border: 1px solid #1b2432;
+  border-radius: 11px;
+  cursor: pointer;
+  color: #9fa8ba;
+  transition: color 0.2s;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.notification-btn:hover {
+  color: #fff;
+  border-color: #31547c;
+  background: #122740;
+}
+
+.user-menu {
+  position: relative;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.user-avatar:hover {
+  opacity: 0.8;
+}
+
+.user-dropdown {
+  display: none;
+  position: absolute;
+  left: calc(100% + 8px);
+  bottom: -8px;
+  background-color: #121722;
+  border: 1px solid #283247;
+  border-radius: 8px;
+  min-width: 280px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  padding-top: 5px;
+}
+
+.user-menu:hover .user-dropdown {
+  display: block;
+}
+
+.user-menu.open .user-dropdown {
+  display: block;
+}
+
+.dropdown-content {
+  padding: 1rem;
+}
+
+.dropdown-user-info {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #2a2a2a;
+  margin-bottom: 1rem;
+}
+
+.dropdown-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+}
+
+.dropdown-username {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.dropdown-profile-link {
+  color: #4a9eff;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.dropdown-logout {
+  width: 100%;
+  padding: 0.75rem;
+  background: none;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.2s;
+}
+
+.dropdown-logout:hover {
+  background-color: #2a2a2a;
+}
+
+.notification-count {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  border: 1px solid #09111d;
+  font-size: 0.66rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+.notifications-popover {
+  position: absolute;
+  left: calc(100% + 14px);
+  bottom: 44px;
+  width: 360px;
+  max-height: 70vh;
+  display: none;
+  flex-direction: column;
+  border-radius: 12px;
+  border: 1px solid #2a3346;
+  background: #101722;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.notifications-popover.active {
+  display: flex;
+}
+
+.notifications-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 0.95rem;
+  border-bottom: 1px solid #202b3e;
+}
+
+.notifications-header h3 {
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.notifications-mark-all {
+  background: transparent;
+  border: none;
+  color: #7eb6ff;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.notifications-list {
+  overflow-y: auto;
+  padding: 0.45rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.notification-item {
+  width: 100%;
+  border: 1px solid #1f2a3d;
+  background: #0d131d;
+  color: #d8deea;
+  border-radius: 10px;
+  text-align: left;
+  padding: 0.7rem 0.75rem;
+  cursor: pointer;
+}
+
+.notification-item.unread {
+  border-color: #2b4f76;
+  background: #122237;
+}
+
+.notification-item-title {
+  font-size: 0.86rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.notification-item-message {
+  font-size: 0.8rem;
+  color: #b3bdd1;
+  line-height: 1.35;
+}
+
+.notification-item-time {
+  margin-top: 0.35rem;
+  font-size: 0.72rem;
+  color: #7d8aa3;
+}
+
+/* Main Content */
+.main-content {
+  width: auto;
+  max-width: none;
+  margin: 0 0 0 88px;
+  padding: 2rem 2.2rem;
+}
+
+/* Hero Section */
+.hero-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  padding: 4rem 0;
+  align-items: center;
+}
+
+.hero-title {
+  font-size: 4rem;
+  font-weight: 700;
+  color: #4a9eff;
+  margin-bottom: 1.5rem;
+}
+
+.hero-description {
+  font-size: 1.1rem;
+  color: #999;
+  margin-bottom: 2rem;
+  line-height: 1.8;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.hero-image {
+  position: relative;
+  height: 400px;
+  border-radius: 16px;
+  overflow: hidden;
+  background-color: #0c1522;
+  background-image:
+    url("/kyvald0.png?v=3"),
+    url("/Kyvald0.png?v=3");
+  background-size: contain;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+.hero-gradient {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(7, 14, 24, 0.33) 0%, rgba(11, 24, 42, 0.18) 48%, rgba(15, 37, 63, 0.26) 100%);
+  opacity: 1;
+}
+
+/* Buttons */
+.btn {
+  padding: 0.875rem 1.75rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background-color: #4a9eff;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background-color: #3a8eef;
+}
+
+.btn-secondary {
+  background-color: #1a3a5c;
+  color: #fff;
+}
+
+.btn-secondary:hover {
+  background-color: #2a4a6c;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: #fff;
+  margin-top: 2rem;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+}
+
+.sidebar-section .btn-danger {
+  margin-top: 0;
+}
+
+.btn-full {
+  width: 100%;
+}
+
+/* Petitions Section */
+.petitions-section {
+  padding: 3rem 0;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.count {
+  color: #666;
+  font-size: 1.5rem;
+  margin-left: 0.5rem;
+}
+
+.tabs {
+  display: flex;
+  gap: 1rem;
+}
+
+.tab {
+  padding: 0.5rem 1rem;
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: color 0.2s;
+}
+
+.tab:hover,
+.tab.active {
+  color: #fff;
+}
+
+.search-bar {
+  margin-bottom: 2rem;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  background: linear-gradient(180deg, #0f1520 0%, #0b111a 100%);
+  border: 1px solid #2a3a52;
+  border-radius: 12px;
+  color: #f0f4fb;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+}
+
+.search-bar input:focus {
+  outline: none;
+  border-color: #5aa8ff;
+  box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.14);
+}
+
+/* Petitions Grid */
+.petitions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.petition-card {
+  background-color: #0f0f0f;
+  border: 1px solid #1a1a1a;
+  border-radius: 12px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  min-width: 0;
+}
+
+.petition-card:hover {
+  border-color: #2a2a2a;
+  transform: translateY(-2px);
+}
+
+.petition-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.petition-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+}
+
+.petition-card-owner {
+  font-size: 0.9rem;
+  color: #999;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.petition-card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.petition-card-description {
+  color: #999;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.petition-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #999;
+}
+
+.petition-card-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #4ade80;
+}
+
+.status-indicator.expired {
+  background-color: #ef4444;
+}
+
+.petition-card-stats {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.results-hidden-label {
+  color: #8cbcff;
+  font-size: 0.9rem;
+  letter-spacing: 0.01em;
+}
+
+.skeleton-card {
+  cursor: default;
+  pointer-events: none;
+}
+
+.skeleton-line {
+  height: 12px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #1a202b 0%, #263247 50%, #1a202b 100%);
+  background-size: 220% 100%;
+  animation: skeleton-shimmer 1.2s linear infinite;
+  margin-bottom: 0.68rem;
+}
+
+.skeleton-line-avatar {
+  width: 46%;
+  height: 34px;
+}
+
+.skeleton-line-badge {
+  width: 34%;
+}
+
+.skeleton-line-title {
+  width: 78%;
+  height: 15px;
+}
+
+.skeleton-line-text {
+  width: 100%;
+}
+
+.skeleton-line-text.short {
+  width: 58%;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -20% 0;
+  }
+}
+
+.empty-message {
+  text-align: center;
+  color: #666;
+  padding: 3rem;
+  font-size: 1.1rem;
+}
+
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.active {
+  display: flex;
+}
+
+.modal-content {
+  background-color: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 450px;
+  width: 90%;
+  position: relative;
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 2rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.modal-close:hover {
+  color: #fff;
+}
+
+.modal-title {
+  font-size: 1.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.05rem;
+}
+
+.form-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  color: #fff;
+  font-weight: 500;
+}
+
+.label-text {
+  font-size: 0.95rem;
+}
+
+.label-required {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.label-optional {
+  color: #666;
+  font-size: 0.85rem;
+  font-weight: 400;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 0.82rem 0.94rem;
+  background: linear-gradient(180deg, #0f1724 0%, #0c131e 100%);
+  border: 1px solid #2d405f;
+  border-radius: 11px;
+  color: #f3f7ff;
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: all 0.18s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #63afff;
+  background: linear-gradient(180deg, #121d2b 0%, #0f1824 100%);
+  box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.15);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder,
+.form-group select::placeholder {
+  color: #6f7f9a;
+}
+
+.form-group textarea {
+  min-height: 152px;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.form-group input:disabled,
+.form-group textarea:disabled,
+.form-group select:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+}
+
+.form-group input[type="datetime-local"] {
+  color-scheme: dark;
+}
+
+.form-group small {
+  display: block;
+  margin-top: 0.34rem;
+  color: #7f8da6;
+  font-size: 0.8rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid #2a2a2a;
+}
+
+.form-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 180px;
+}
+
+.image-preview {
+  margin-top: 1.5rem;
+  display: none;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid #2a2a2a;
+}
+
+.image-preview.active {
+  display: block;
+}
+
+.image-preview img {
+  max-width: 100%;
+  display: block;
+}
+
+/* Profile Page */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  color: #999;
+  font-size: 0.95rem;
+}
+
+.breadcrumb a {
+  color: #4a9eff;
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.profile-container {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 3rem;
+}
+
+.profile-sidebar {
+  position: relative;
+  height: fit-content;
+}
+
+.profile-avatar-container {
+  position: sticky;
+  top: 1.15rem;
+  background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
+  border: 1px solid #2a2a2a;
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Added styles for 3D skin viewer container */
+.skin-viewer-3d {
+  width: 100%;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: radial-gradient(circle at center, rgba(74, 158, 255, 0.05) 0%, transparent 70%);
+}
+
+.skin-viewer-3d canvas {
+  max-width: 100%;
+  border-radius: 8px;
+  cursor: grab;
+}
+
+.skin-viewer-3d canvas:active {
+  cursor: grabbing;
+}
+
+.profile-avatar-fallback {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+#skinViewer {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+.profile-username {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.profile-tabs {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.profile-tab {
+  padding: 1rem 1.5rem;
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  font-size: 1rem;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.profile-tab:hover,
+.profile-tab.active {
+  color: #fff;
+  border-bottom-color: #4a9eff;
+}
+
+.profile-section-title {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.petitions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Create Petition Page */
+.create-petition-container {
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.create-petition-header {
+  margin-bottom: 1.2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #243145;
+}
+
+.page-title {
+  font-size: 2.1rem;
+  margin-bottom: 0.45rem;
+}
+
+.page-subtitle {
+  color: #999;
+  font-size: 1.05rem;
+  margin-top: 0.75rem;
+  line-height: 1.6;
+}
+
+.create-insights {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.create-insight-card {
+  border: 1px solid #22364f;
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  background: linear-gradient(160deg, rgba(20, 36, 57, 0.65) 0%, rgba(12, 20, 31, 0.9) 100%);
+}
+
+.create-insight-card-warning {
+  border-color: #534125;
+  background: linear-gradient(160deg, rgba(49, 37, 17, 0.6) 0%, rgba(17, 14, 10, 0.9) 100%);
+}
+
+.create-insight-title {
+  font-size: 0.95rem;
+  margin-bottom: 0.45rem;
+}
+
+.create-insight-text {
+  color: #b8bec8;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.petition-form {
+  background: linear-gradient(160deg, #0f1723 0%, #121b29 50%, #0d151f 100%);
+  border: 1px solid #2a3d58;
+  border-radius: 18px;
+  padding: 1.65rem;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.33);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.95rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+  padding-top: 1.05rem;
+  border-top: 1px solid #253246;
+}
+
+.form-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 140px;
+  font-size: 0.92rem;
+  padding: 0.72rem 1.2rem;
+}
+
+/* Petition Detail Page */
+.petition-detail-container {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 3rem;
+}
+
+.petition-detail-main,
+.petition-detail-sidebar,
+.profile-main {
+  min-width: 0;
+}
+
+.petition-detail-header {
+  margin-bottom: 2rem;
+}
+
+.petition-detail-title {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.petition-detail-meta {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  color: #999;
+}
+
+.petition-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: #1a3a2a;
+  color: #4ade80;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.petition-status.expired {
+  background-color: #3a1a1a;
+  color: #ef4444;
+}
+
+.petition-code {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.32rem 0.62rem;
+  border: 1px solid #22334b;
+  border-radius: 999px;
+  color: #8bbaff;
+  background: #0f1b2a;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.petition-detail-image {
+  margin-bottom: 2rem;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.petition-detail-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.petition-detail-description {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #ccc;
+  margin-bottom: 2rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.petition-voting {
+  background-color: #0f0f0f;
+  border: 1px solid #1a1a1a;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.petition-voting h3 {
+  margin-bottom: 1rem;
+}
+
+.voting-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.vote-btn {
+  padding: 1.15rem 0.85rem;
+  background: linear-gradient(170deg, #151d2a 0%, #101723 100%);
+  border: 1px solid #2a3a53;
+  border-radius: 12px;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.vote-btn:hover {
+  border-color: #4a9eff;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(2, 7, 15, 0.42);
+}
+
+.vote-btn.voted {
+  border-color: #4a9eff;
+  background: linear-gradient(170deg, #1b324f 0%, #14263d 100%);
+}
+
+.vote-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vote-icon {
+  width: 34px;
+  height: 34px;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.25));
+}
+
+.vote-btn span {
+  text-align: center;
+  line-height: 1.2;
+}
+
+.vote-btn.vote-for {
+  border-color: #2a5a43;
+}
+
+.vote-btn.vote-for:hover {
+  border-color: #4ade80;
+  box-shadow: 0 8px 18px rgba(19, 80, 45, 0.35);
+}
+
+.vote-btn.vote-against {
+  border-color: #5b2d35;
+}
+
+.vote-btn.vote-against:hover {
+  border-color: #ef4444;
+  box-shadow: 0 8px 18px rgba(103, 23, 39, 0.35);
+}
+
+.vote-btn.vote-abstain {
+  border-color: #5a4a20;
+}
+
+.vote-btn.vote-abstain:hover,
+.vote-btn.vote-abstain.voted {
+  border-color: #fbbf24;
+  background: linear-gradient(170deg, #2f2816 0%, #1b1710 100%);
+  box-shadow: 0 8px 18px rgba(120, 89, 21, 0.35);
+}
+
+.vote-message {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #1a3a5c;
+  border-radius: 8px;
+  text-align: center;
+  display: none;
+}
+
+.vote-message.active {
+  display: block;
+}
+
+.petition-stats {
+  background-color: #0f0f0f;
+  border: 1px solid #1a1a1a;
+  border-radius: 12px;
+  padding: 2rem;
+}
+
+.stat-bar {
+  height: 6px;
+  background-color: rgba(30, 30, 30, 0.8);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(50, 50, 50, 0.5);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.stat-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, rgba(74, 158, 255, 0.4) 0%, rgba(74, 158, 255, 0.6) 100%);
+  transition: width 0.3s ease;
+  box-shadow: 0 0 8px rgba(74, 158, 255, 0.3);
+}
+
+.stat-numbers {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.1rem;
+}
+
+.results-hidden-notice {
+  display: none;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #274569;
+  color: #95c3ff;
+  background: rgba(20, 45, 73, 0.35);
+  margin-top: 0.25rem;
+}
+
+.stat-for {
+  color: #4ade80;
+}
+
+.stat-against {
+  color: #ef4444;
+}
+
+.petition-detail-sidebar {
+  position: sticky;
+  top: 100px;
+  height: fit-content;
+}
+
+.sidebar-section {
+  background-color: #0f0f0f;
+  border: 1px solid #1a1a1a;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.sidebar-section h3 {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.user-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background-color: #1a1a1a;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.user-item:last-child {
+  margin-bottom: 0;
+}
+
+.user-item-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+}
+
+.user-item-name {
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.voters-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.voters-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.voters-list::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 3px;
+}
+
+.voters-list::-webkit-scrollbar-thumb {
+  background: #2a2a2a;
+  border-radius: 3px;
+}
+
+.voters-list::-webkit-scrollbar-thumb:hover {
+  background: #3a3a3a;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .hero-image {
+    background-size: cover;
+    background-position: center;
+  }
+
+  .navbar {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #171a21;
+  }
+
+  .nav-container {
+    flex-direction: row;
+    align-items: center;
+    padding: 0.65rem 0.75rem;
+    gap: 0.55rem;
+  }
+
+  .nav-links {
+    flex-direction: row;
+    margin-top: 0;
+    gap: 0.35rem;
+    overflow-x: auto;
+    flex: 1;
+    align-items: center;
+  }
+
+  .nav-link {
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
+    min-width: 40px;
+    margin: 0;
+    padding: 0;
+    border-radius: 10px;
+  }
+
+  .nav-icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .nav-label {
+    display: none;
+  }
+
+  .nav-user {
+    margin-top: 0;
+    margin-left: auto;
+    padding-bottom: 0;
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .notifications-popover {
+    left: auto;
+    right: 0;
+    bottom: auto;
+    top: calc(100% + 10px);
+    width: min(420px, calc(100vw - 20px));
+  }
+
+  .user-dropdown {
+    left: auto;
+    right: 0;
+    bottom: auto;
+    top: calc(100% + 10px);
+  }
+
+  .main-content {
+    width: 100%;
+    margin-left: 0;
+    padding: 1.6rem 1.2rem;
+  }
+
+  .hero-section {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-container,
+  .petition-detail-container {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-avatar-container {
+    position: static;
+    top: auto;
+  }
+
+  .petition-detail-sidebar {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-logo {
+    display: none;
+  }
+
+  .notification-btn,
+  .user-avatar {
+    width: 38px;
+    height: 38px;
+  }
+
+  .notifications-popover {
+    width: calc(100vw - 14px);
+    right: -6px;
+  }
+
+  .hero-title {
+    font-size: 2.5rem;
+  }
+
+  .petitions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions .btn {
+    width: 100%;
+  }
+}
+
+/* Icon Styles */
+.icon-thumbs-up,
+.icon-thumbs-down,
+.icon-bell {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+}
+
+/* Extended components */
+.modal-text {
+  color: #aaa;
+  margin-bottom: 1.5rem;
+}
+
+.confirm-modal-content {
+  max-width: 500px;
+  border: 1px solid #294b73;
+  background: linear-gradient(160deg, #111a27 0%, #0b121c 100%);
+}
+
+.confirm-modal-content .modal-title {
+  margin-bottom: 0.75rem;
+  font-size: 1.45rem;
+}
+
+.confirm-modal-content .modal-text {
+  margin-bottom: 0;
+  color: #c3cde0;
+  line-height: 1.55;
+}
+
+.confirm-modal-actions {
+  margin-top: 1.15rem;
+  padding-top: 0;
+  border-top: none;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+
+.confirm-modal-actions .btn {
+  min-width: 150px;
+}
+
+.form-group select {
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, #7da6dc 50%), linear-gradient(135deg, #7da6dc 50%, transparent 50%);
+  background-position:
+    calc(100% - 18px) calc(50% - 3px),
+    calc(100% - 12px) calc(50% - 3px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 2.3rem;
+}
+
+.card-badges {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.mini-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid #2a2a2a;
+  font-size: 0.75rem;
+  color: #bbb;
+  background: #141414;
+}
+
+.mini-badge-id {
+  color: #8bbaff;
+  border-color: #294266;
+  background: #0e1b2d;
+}
+
+.badge-success {
+  color: #4ade80;
+  border-color: #24583b;
+  background: #102417;
+}
+
+.badge-danger {
+  color: #ef4444;
+  border-color: #5f2525;
+  background: #271515;
+}
+
+.meta-chip {
+  margin-top: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid #2a2a2a;
+  color: #bbb;
+  font-size: 0.82rem;
+  background: #141414;
+}
+
+.status-indicator.approved {
+  background-color: #4a9eff;
+}
+
+.petition-status.approved {
+  background-color: #142941;
+  color: #4a9eff;
+}
+
+.voting-buttons {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.three-vote-stats {
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.three-vote-stats span {
+  font-size: 0.95rem;
+}
+
+.tri-stat-bar {
+  display: flex;
+  overflow: hidden;
+  height: 10px;
+}
+
+.stat-segment {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.stat-segment-for {
+  background: linear-gradient(90deg, #2f7a4f 0%, #4ade80 100%);
+}
+
+.stat-segment-against {
+  background: linear-gradient(90deg, #7a2f2f 0%, #ef4444 100%);
+}
+
+.stat-segment-abstain {
+  background: linear-gradient(90deg, #8f6a1e 0%, #fbbf24 100%);
+}
+
+.stat-abstain {
+  color: #fbbf24;
+}
+
+.compact-empty {
+  padding: 0.75rem;
+  font-size: 0.92rem;
+}
+
+.voters-block h4 {
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.voters-block + .voters-block {
+  margin-top: 1rem;
+}
+
+.registry-form {
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.registry-form::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at top right, rgba(74, 158, 255, 0.1), transparent 38%);
+}
+
+.registry-reason {
+  color: #aaa;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.registry-grid .petition-card-description {
+  -webkit-line-clamp: 4;
+}
+
+.registry-card {
+  border-color: #23364f;
+}
+
+.registry-card:hover {
+  border-color: #3b5f87;
+}
+
+.registry-open-hint {
+  margin-left: auto;
+  color: #7cb3ff;
+  font-size: 0.82rem;
+}
+
+.registry-card .petition-card-meta {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.registry-modal-content {
+  max-width: 780px;
+}
+
+.registry-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-right: 2rem;
+}
+
+.registry-modal-head .modal-title {
+  margin: 0;
+}
+
+.registry-modal-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  color: #9aa5b7;
+  font-size: 0.92rem;
+  margin-bottom: 1rem;
+}
+
+.registry-modal-body {
+  border: 1px solid #2a2a2a;
+  border-radius: 10px;
+  background: #101010;
+  padding: 1rem;
+  white-space: pre-wrap;
+  line-height: 1.7;
+  color: #d8d8d8;
+  max-height: 55vh;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.registry-modal-reason {
+  margin-top: 1rem;
+  border-top: 1px solid #2a2a2a;
+  padding-top: 1rem;
+}
+
+.registry-modal-reason h4 {
+  font-size: 0.95rem;
+  margin-bottom: 0.35rem;
+}
+
+.registry-modal-reason p {
+  color: #b8b8b8;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.registry-modal-actions {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #2a2a2a;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.registry-modal-actions .btn-danger {
+  margin-top: 0;
+}
+
+.profile-role {
+  margin-top: 1rem;
+  margin-bottom: 0.7rem;
+}
+
+.profile-roles-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.role-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  padding: 0.32rem 0.68rem;
+  border-radius: 999px;
+  border: 1px solid #2a3a52;
+  background: #0f1622;
+  color: #d2deee;
+  font-size: 0.78rem;
+  line-height: 1;
+}
+
+.role-chip-icon {
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.role-chip-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.role-admin {
+  border-color: #5a4a20;
+  color: #f2d590;
+  background: #171208;
+}
+
+.role-minister {
+  border-color: #2f4d74;
+  color: #a8cdfa;
+}
+
+.role-chamber {
+  border-color: #36533a;
+  color: #bde8c3;
+}
+
+.role-citizen {
+  border-color: #334055;
+  color: #c4cfdf;
+}
+
+.admin-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.admin-search {
+  margin-bottom: 0;
+  flex: 1;
+  min-width: 260px;
+}
+
+.admin-counter {
+  font-size: 0.9rem;
+  color: #9da7bc;
+  background: #101722;
+  border: 1px solid #26344b;
+  border-radius: 10px;
+  padding: 0.66rem 0.82rem;
+}
+
+.admin-user-card {
+  padding-bottom: 1.2rem;
+}
+
+.admin-card-title {
+  margin-bottom: 0.15rem;
+  font-size: 1.15rem;
+}
+
+.admin-role-controls {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 0.75rem;
+}
+
+.role-select {
+  flex: 1;
+  min-width: 180px;
+  padding: 0.7rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid #2a2a2a;
+  background: #0f0f0f;
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+.role-select:disabled {
+  opacity: 0.5;
+}
+
+.save-role-btn {
+  min-width: 130px;
+}
+
+.clear-role-btn {
+  min-width: 170px;
+  border-color: #4d5f79;
+  color: #d2deef;
+}
+
+.clear-role-btn:hover {
+  border-color: #7395c4;
+  background: #152235;
+}
+
+.view-profile-btn {
+  min-width: 110px;
+  text-decoration: none;
+  text-align: center;
+}
+
+.three-vote-stats {
+  display: flex;
+}
+
+@media (max-width: 1024px) {
+  .voting-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .create-insights {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-role-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .save-role-btn,
+  .role-select,
+  .view-profile-btn {
+    width: 100%;
+  }
+
+  .registry-modal-head {
+    padding-right: 1.2rem;
+  }
+
+  .registry-card .petition-card-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.45rem;
+  }
+}
