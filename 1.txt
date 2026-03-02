@@ -157,12 +157,4 @@ Mar 02 15:46:07.06
 GET
 200
 windpetition.vercel.app
-/api/auth/me
-Mar 02 15:46:06.18
-GET
-200
-windpetition.vercel.app
-/
-Mar 02 15:46:04.95
-GET
-302
+/api/au
