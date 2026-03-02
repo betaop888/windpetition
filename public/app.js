@@ -294,23 +294,23 @@ function formatProposalId(proposal) {
 
 function navIconSvg(key) {
   if (key === "home") {
-    return '<svg viewBox="0 0 24 24" fill="none"><path d="M3.75 10.5L12 4L20.25 10.5V19.25C20.25 19.8 19.8 20.25 19.25 20.25H14.5V14H9.5V20.25H4.75C4.2 20.25 3.75 19.8 3.75 19.25V10.5Z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"></path></svg>';
+    return '<svg viewBox="0 0 24 24" fill="none"><path d="M4.25 10.75L12 4.75L19.75 10.75V18.5C19.75 19.19 19.19 19.75 18.5 19.75H14.25V14.25H9.75V19.75H5.5C4.81 19.75 4.25 19.19 4.25 18.5V10.75Z" stroke="currentColor" stroke-width="1.85" stroke-linejoin="round"></path></svg>';
   }
 
   if (key === "minister") {
-    return '<svg viewBox="0 0 24 24" fill="none"><circle cx="8.5" cy="9" r="2.25" stroke="currentColor" stroke-width="1.9"></circle><circle cx="15.5" cy="9" r="2.25" stroke="currentColor" stroke-width="1.9"></circle><path d="M4.5 18.75C4.9 16.3 6.45 14.75 8.5 14.75C10.55 14.75 12.1 16.3 12.5 18.75" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"></path><path d="M11.5 18.75C11.9 16.3 13.45 14.75 15.5 14.75C17.55 14.75 19.1 16.3 19.5 18.75" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"></path></svg>';
+    return '<svg viewBox="0 0 24 24" fill="none"><circle cx="8.3" cy="8.7" r="2.2" stroke="currentColor" stroke-width="1.8"></circle><circle cx="15.7" cy="8.7" r="2.2" stroke="currentColor" stroke-width="1.8"></circle><path d="M4.9 18.9C5.4 16.55 6.95 15.1 8.3 15.1C9.65 15.1 11.2 16.55 11.7 18.9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path><path d="M12.3 18.9C12.8 16.55 14.35 15.1 15.7 15.1C17.05 15.1 18.6 16.55 19.1 18.9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>';
   }
 
   if (key === "registry") {
-    return '<svg viewBox="0 0 24 24" fill="none"><path d="M5 4.75C5 4.2 5.45 3.75 6 3.75H17.25C17.8 3.75 18.25 4.2 18.25 4.75V19.25C18.25 19.8 17.8 20.25 17.25 20.25H6C5.45 20.25 5 19.8 5 19.25V4.75Z" stroke="currentColor" stroke-width="1.9"></path><path d="M8.25 8.25H15M8.25 12H15M8.25 15.75H13" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"></path></svg>';
+    return '<svg viewBox="0 0 24 24" fill="none"><path d="M5.6 4.8C5.6 4.25 6.05 3.8 6.6 3.8H17.25C17.8 3.8 18.25 4.25 18.25 4.8V19.2C18.25 19.75 17.8 20.2 17.25 20.2H6.6C6.05 20.2 5.6 19.75 5.6 19.2V4.8Z" stroke="currentColor" stroke-width="1.8"></path><path d="M8.1 8.35H15.6M8.1 12H15.6M8.1 15.65H12.9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>';
   }
 
   if (key === "admin") {
-    return '<svg viewBox="0 0 24 24" fill="none"><path d="M12 3.75L18.75 6.5V11.5C18.75 15.85 16.35 19.05 12 20.25C7.65 19.05 5.25 15.85 5.25 11.5V6.5L12 3.75Z" stroke="currentColor" stroke-width="1.9"></path><path d="M12 8.2L12.9 10.05L14.95 10.35L13.45 11.8L13.8 13.85L12 12.9L10.2 13.85L10.55 11.8L9.05 10.35L11.1 10.05L12 8.2Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"></path></svg>';
+    return '<svg viewBox="0 0 24 24" fill="none"><path d="M12 4.1L18.25 6.65V11.35C18.25 15.45 15.95 18.55 12 19.8C8.05 18.55 5.75 15.45 5.75 11.35V6.65L12 4.1Z" stroke="currentColor" stroke-width="1.85"></path><path d="M9.2 12.05L11.05 13.9L14.8 10.15" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
   }
 
   if (key === "petitions") {
-    return '<svg viewBox="0 0 24 24" fill="none"><rect x="4.75" y="4.75" width="14.5" height="14.5" rx="1.8" stroke="currentColor" stroke-width="1.9"></rect><path d="M8 9.25H15.8M8 12.25H15.8M8 15.25H12.8" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"></path><path d="M16.85 17.6L19.75 20.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"></path></svg>';
+    return '<svg viewBox="0 0 24 24" fill="none"><rect x="4.9" y="4.5" width="13.7" height="14.9" rx="2" stroke="currentColor" stroke-width="1.8"></rect><path d="M8 8.5H15M8 12H15M8 15.5H12.4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path><path d="M15.3 16.7L18.8 20.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg>';
   }
 
   return '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"></circle></svg>';

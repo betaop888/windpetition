@@ -16,9 +16,9 @@ body {
 
 /* Navbar */
 .navbar {
-  background: linear-gradient(180deg, #090b10 0%, #05070a 100%);
-  border-right: 1px solid #171a21;
-  width: 88px;
+  background: linear-gradient(180deg, #0b0f16 0%, #060a11 100%);
+  border-right: 1px solid #182235;
+  width: 96px;
   height: 100vh;
   position: fixed;
   left: 0;
@@ -30,20 +30,20 @@ body {
   height: 100%;
   width: 100%;
   margin: 0;
-  padding: 0.9rem 0.65rem;
+  padding: 0.95rem 0.75rem;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   justify-content: flex-start;
-  gap: 0.9rem;
+  gap: 0.85rem;
 }
 
 .nav-logo svg {
   display: block;
   margin: 0 auto;
-  width: 30px;
-  height: 30px;
-  opacity: 0.95;
+  width: 33px;
+  height: 33px;
+  opacity: 0.96;
 }
 
 .nav-links {
@@ -56,19 +56,19 @@ body {
 }
 
 .nav-link {
-  color: #9fa8ba;
+  color: #a9b8cd;
   text-decoration: none;
   font-size: 0;
   line-height: 0;
-  transition: all 0.22s ease;
-  width: 52px;
-  height: 52px;
-  min-height: 52px;
-  min-width: 52px;
+  transition: color 0.22s ease;
+  width: 58px;
+  height: 58px;
+  min-height: 58px;
+  min-width: 58px;
   margin: 0 auto;
   padding: 0;
   border: 1px solid transparent;
-  border-radius: 14px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -98,32 +98,33 @@ body {
 }
 
 .nav-icon {
-  width: 28px;
-  height: 28px;
+  width: 34px;
+  height: 34px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 9px;
-  border: 1px solid #243145;
-  background: linear-gradient(180deg, #101824 0%, #0b121d 100%);
-  color: #acb9cd;
-  transition: all 0.22s ease;
+  border-radius: 11px;
+  border: 1px solid #27374f;
+  background: linear-gradient(180deg, #121e31 0%, #0d1828 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 5px 12px rgba(0, 0, 0, 0.34);
+  color: #b9cae2;
+  transition: border-color 0.22s ease, color 0.22s ease, box-shadow 0.22s ease;
 }
 
 .nav-icon svg {
-  width: 17px;
-  height: 17px;
+  width: 20px;
+  height: 20px;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
 .nav-link:hover .nav-icon,
 .nav-link.active .nav-icon {
-  border-color: #3278c5;
-  background: linear-gradient(180deg, #101824 0%, #0b121d 100%);
-  color: #dbe9ff;
-  transform: none;
-  box-shadow: none;
+  border-color: #4197ef;
+  background: linear-gradient(180deg, #162947 0%, #102036 100%);
+  color: #eff6ff;
+  transform: translateY(-0.5px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 0 1px rgba(65, 151, 239, 0.24), 0 8px 18px rgba(8, 18, 34, 0.45);
 }
 
 .nav-label {
@@ -149,24 +150,26 @@ body {
 }
 
 .notification-btn {
-  background: #101521;
-  border: 1px solid #1b2432;
-  border-radius: 11px;
+  background: linear-gradient(180deg, #121e31 0%, #0d1828 100%);
+  border: 1px solid #27374f;
+  border-radius: 12px;
   cursor: pointer;
-  color: #9fa8ba;
-  transition: color 0.2s;
-  width: 42px;
-  height: 42px;
+  color: #a7b7cc;
+  transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  width: 46px;
+  height: 46px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .notification-btn:hover {
-  color: #fff;
-  border-color: #31547c;
-  background: #122740;
+  color: #f2f8ff;
+  border-color: #4197ef;
+  background: linear-gradient(180deg, #172c4b 0%, #11223a 100%);
+  box-shadow: 0 0 0 1px rgba(65, 151, 239, 0.24), 0 8px 18px rgba(8, 18, 34, 0.45);
 }
 
 .user-menu {
