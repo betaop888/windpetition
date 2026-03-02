@@ -396,7 +396,7 @@ body {
   background-image:
     url("/kyvald0.png?v=4"),
     url("/Kyvald0.png?v=4");
-  background-size: 88% auto;
+  background-size: auto 86%;
   background-position: center center;
   background-repeat: no-repeat;
 }
