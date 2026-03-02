@@ -151,10 +151,3 @@ windpetition.vercel.app
 Mar 02 15:47:45.23
 GET
 200
-windpetition.vercel.app
-/
-Mar 02 15:46:07.06
-GET
-200
-windpetition.vercel.app
-/api/au
