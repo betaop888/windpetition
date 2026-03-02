@@ -395,14 +395,14 @@ body {
 
 .hero-image {
   position: relative;
-  height: 400px;
+  height: 300px;
   border-radius: 16px;
   overflow: hidden;
   background-color: #0c1522;
   background-image:
     url("/kyvald0.png?v=4"),
     url("/Kyvald0.png?v=4");
-  background-size: auto 86%;
+  background-size: auto 92%;
   background-position: center center;
   background-repeat: no-repeat;
 }
@@ -1932,4 +1932,3 @@ body {
     gap: 0.44rem;
   }
 }
-
