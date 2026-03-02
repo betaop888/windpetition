@@ -138,16 +138,4 @@ GET
 windpetition.vercel.app
 /api/auth/callback
 Discord callback failed Error: Token exchange failed with status 401 at p (/var/task/.next/server/pages/api/auth/callback.js:116:1300) at process.processTicksAndRejections (node:internal/process/task_queues:103:5) at async K (/var/task/node_modules/next/dist/compiled/next-server/pages-api.runtime.prod.js:20:16881) at async U.render (/var/task/node_modules/next/dist/compiled/next-server/pages-api.runtime.prod.js:20:17520) at async r9.runApi (/var/task/node_modules/next/dist/compiled/next-server/server.runtime.prod.js:17:44515) at async r9.handleCatchallRenderRequest (/var/task/node_modules/next/dist/compiled/next-server/server.runtime.prod.js:17:38432) at async r9.runImpl (/var/task/node_modules/next/dist/compiled/next-server/server.runtime.prod.js:16:17452) at async r9.handleRequestImpl (/var/task/node_modules/next/dist/compiled/next-server/server.runtime.prod.js:16:16541) at async Object.handler (/var/task/___next_launcher.cjs:57:3) at async Server.r (/opt/rust/nodejs.js:2:15572)
-Mar 02 15:47:48.84
-GET
-302
-windpetition.vercel.app
-/api/auth/discord
-Mar 02 15:47:46.16
-GET
-200
-windpetition.vercel.app
-/api/auth/me
-Mar 02 15:47:45.23
-GET
-200
+Mar 02 
