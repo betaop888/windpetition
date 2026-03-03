@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
@@ -53,11 +53,11 @@
   </nav>
 
   <main class="main-content">
-    <section class="petitions-section">
+    <section class="petitions-section admin-page-section">
       <div class="section-header">
         <div>
           <h2 class="section-title">Управление ролями</h2>
-          <p class="page-subtitle">Новые пользователи получают роль «гражданин» по умолчанию. Здесь администратор может выдавать или отзывать роли «член палаты», «министр» и «администратор». Пользователь `nertin0` всегда остаётся администратором.</p>
+          <p class="page-subtitle">Панель управления участниками: выберите пользователя в списке слева, затем настройте роль в карточке справа.</p>
         </div>
       </div>
 
@@ -65,10 +65,35 @@
         <div class="search-bar admin-search">
           <input type="text" id="adminUserSearch" placeholder="Поиск по пользователям и ролям">
         </div>
+        <div class="admin-selects">
+          <select id="adminRoleFilter" class="admin-filter-select">
+            <option value="all">Все роли</option>
+            <option value="admin">Администратор</option>
+            <option value="minister">Министр</option>
+            <option value="chamber">Член палаты</option>
+            <option value="citizen">Гражданин</option>
+          </select>
+          <select id="adminSortSelect" class="admin-filter-select">
+            <option value="role_name">По роли и имени</option>
+            <option value="name_asc">Имя: А-Я</option>
+            <option value="newest">Новые сначала</option>
+            <option value="oldest">Старые сначала</option>
+          </select>
+        </div>
         <div class="admin-counter">Найдено: <span id="adminUsersCount">0</span></div>
       </div>
 
-      <div class="petitions-list" id="adminUsersList"></div>
+      <div class="admin-role-stats" id="adminRoleStats"></div>
+
+      <div class="admin-discord-layout">
+        <aside class="admin-members-panel">
+          <div class="admin-members-list" id="adminUsersList"></div>
+        </aside>
+
+        <section class="admin-member-detail" id="adminUserDetail">
+          <div class="admin-detail-empty">Выберите пользователя в списке, чтобы открыть управление ролями.</div>
+        </section>
+      </div>
     </section>
   </main>
 

@@ -2067,40 +2067,132 @@ async function initNotificationsPage() {
   await loadPageNotifications();
 }
 
-function adminUserCardTemplate(user) {
-  const fixedAdmin = user.username.toLowerCase() === "nertin0";
-  const options = fixedAdmin
-    ? '<option value="admin" selected>Администратор</option>'
-    : `
-        <option value="citizen" ${user.role === "citizen" ? "selected" : ""}>Гражданин</option>
-        <option value="chamber" ${user.role === "chamber" ? "selected" : ""}>Член палаты</option>
-        <option value="minister" ${user.role === "minister" ? "selected" : ""}>Министр</option>
-        <option value="admin" ${user.role === "admin" ? "selected" : ""}>Администратор</option>
-      `;
+function adminRolePriority(role) {
+  if (role === ROLE_ADMIN) {
+    return 0;
+  }
+
+  if (role === ROLE_MINISTER) {
+    return 1;
+  }
+
+  if (role === ROLE_CHAMBER) {
+    return 2;
+  }
+
+  return 3;
+}
+
+function adminRoleClass(role) {
+  if (role === ROLE_ADMIN) {
+    return "role-admin";
+  }
+
+  if (role === ROLE_MINISTER) {
+    return "role-minister";
+  }
+
+  if (role === ROLE_CHAMBER) {
+    return "role-chamber";
+  }
+
+  return "role-citizen";
+}
+
+function adminRoleOptionsTemplate(currentRole, fixedAdmin = false) {
+  if (fixedAdmin) {
+    return '<option value="admin" selected>Администратор</option>';
+  }
 
   return `
-    <article class="petition-card admin-user-card" data-user-id="${user.id}">
-      <div class="petition-card-header">
-        <img src="${safeAvatar(user.avatarUrl, 48)}" alt="${escapeHtml(user.username)}" class="petition-card-icon">
-        <div>
-          <div class="petition-card-title admin-card-title">${escapeHtml(user.username)}</div>
-          <div class="petition-card-owner">Текущая роль: ${roleLabel(user.role)}</div>
+    <option value="citizen" ${currentRole === "citizen" ? "selected" : ""}>Гражданин</option>
+    <option value="chamber" ${currentRole === "chamber" ? "selected" : ""}>Член палаты</option>
+    <option value="minister" ${currentRole === "minister" ? "selected" : ""}>Министр</option>
+    <option value="admin" ${currentRole === "admin" ? "selected" : ""}>Администратор</option>
+  `;
+}
+
+function adminUserListItemTemplate(user, selectedUserId) {
+  const selectedClass = user.id === selectedUserId ? "active" : "";
+  const roleClass = adminRoleClass(user.role);
+
+  return `
+    <button class="admin-member-item ${selectedClass}" type="button" data-user-id="${user.id}">
+      <img src="${safeAvatar(user.avatarUrl, 48)}" alt="${escapeHtml(user.username)}" class="admin-member-avatar">
+      <div class="admin-member-main">
+        <div class="admin-member-top">
+          <span class="admin-member-name">${escapeHtml(user.username)}</span>
+          <span class="admin-member-role ${roleClass}">${escapeHtml(roleTitle(user.role))}</span>
+        </div>
+        <div class="admin-member-meta">
+          <span class="admin-member-id">ID ${user.id}</span>
+          <span>•</span>
+          <span>${formatDateTime(user.createdAt)} МСК</span>
         </div>
       </div>
-      <div class="admin-role-controls">
-        <select class="role-select" ${fixedAdmin ? "disabled" : ""}>
-          ${options}
-        </select>
-        <a href="/profile?userId=${user.id}" class="btn btn-secondary view-profile-btn">Профиль</a>
-        <button class="btn btn-primary save-role-btn" type="button" ${fixedAdmin ? "disabled" : ""}>Сохранить</button>
-        ${
-          fixedAdmin
-            ? ""
-            : '<button class="btn btn-secondary clear-role-btn" type="button">Сделать гражданином</button>'
-        }
+    </button>
+  `;
+}
+
+function adminRoleStatTemplate(label, count, roleClass) {
+  return `
+    <div class="admin-role-stat ${roleClass}">
+      <span>${escapeHtml(label)}</span>
+      <strong>${count}</strong>
+    </div>
+  `;
+}
+
+function adminUserDetailTemplate(user) {
+  const fixedAdmin = user.username.toLowerCase() === "nertin0";
+  const options = adminRoleOptionsTemplate(user.role, fixedAdmin);
+  const roleClass = adminRoleClass(user.role);
+
+  return `
+    <div class="admin-detail-head">
+      <img src="${safeAvatar(user.avatarUrl, 72)}" alt="${escapeHtml(user.username)}" class="admin-detail-avatar">
+      <div>
+        <h3 class="admin-detail-username">${escapeHtml(user.username)}</h3>
+        <p class="admin-detail-subline">ID: ${user.id}</p>
+        <p class="admin-detail-subline">Текущая роль: <span class="admin-member-role ${roleClass}">${escapeHtml(roleTitle(user.role))}</span></p>
       </div>
-      ${fixedAdmin ? '<p class="page-subtitle">Пользователь nertin0 всегда администратор.</p>' : ""}
-    </article>
+    </div>
+
+    <div class="admin-detail-roles">
+      ${rolesForUser(user).map(roleBadgeTemplate).join("")}
+    </div>
+
+    <div class="admin-detail-grid">
+      <div class="admin-detail-field">
+        <span>Регистрация</span>
+        <strong>${formatDateTime(user.createdAt)} МСК</strong>
+      </div>
+      <div class="admin-detail-field">
+        <span>Профиль</span>
+        <strong>@${escapeHtml(user.username)}</strong>
+      </div>
+    </div>
+
+    <div class="admin-detail-controls">
+      <select class="admin-filter-select admin-detail-select" id="adminDetailRoleSelect" ${fixedAdmin ? "disabled" : ""}>
+        ${options}
+      </select>
+      <button class="btn btn-primary" type="button" id="adminDetailSaveBtn" ${fixedAdmin ? "disabled" : ""}>Сохранить роль</button>
+      ${fixedAdmin ? "" : '<button class="btn btn-secondary" type="button" id="adminDetailResetBtn">Сделать гражданином</button>'}
+    </div>
+
+    <div class="admin-quick-roles" id="adminQuickRoles">
+      <button class="admin-quick-role-btn ${user.role === "citizen" ? "active" : ""}" type="button" data-role="citizen" ${fixedAdmin ? "disabled" : ""}>Гражданин</button>
+      <button class="admin-quick-role-btn ${user.role === "chamber" ? "active" : ""}" type="button" data-role="chamber" ${fixedAdmin ? "disabled" : ""}>Член палаты</button>
+      <button class="admin-quick-role-btn ${user.role === "minister" ? "active" : ""}" type="button" data-role="minister" ${fixedAdmin ? "disabled" : ""}>Министр</button>
+      <button class="admin-quick-role-btn ${user.role === "admin" ? "active" : ""}" type="button" data-role="admin" ${fixedAdmin ? "disabled" : ""}>Администратор</button>
+    </div>
+
+    <div class="admin-detail-actions">
+      <a href="/profile?userId=${user.id}" class="btn btn-secondary view-profile-btn">Открыть профиль</a>
+    </div>
+
+    ${fixedAdmin ? '<p class="admin-fixed-note">Пользователь nertin0 всегда администратор.</p>' : ""}
   `;
 }
 
@@ -2112,114 +2204,260 @@ async function initAdminPage() {
   }
 
   const list = document.getElementById("adminUsersList");
+  const detail = document.getElementById("adminUserDetail");
   const searchInput = document.getElementById("adminUserSearch");
+  const roleFilter = document.getElementById("adminRoleFilter");
+  const sortSelect = document.getElementById("adminSortSelect");
   const usersCount = document.getElementById("adminUsersCount");
-  if (!list) {
+  const roleStats = document.getElementById("adminRoleStats");
+
+  if (!list || !detail) {
     return;
   }
 
   let allUsers = [];
+  let selectedUserId = null;
 
-  const bindUserCardActions = () => {
-    list.querySelectorAll(".admin-user-card").forEach((card) => {
-      const userId = Number.parseInt(card.dataset.userId || "", 10);
-      const select = card.querySelector(".role-select");
-      const saveButton = card.querySelector(".save-role-btn");
-      const clearButton = card.querySelector(".clear-role-btn");
+  const updateRoleStats = () => {
+    if (!roleStats) {
+      return;
+    }
 
-      if (!select || !saveButton || !Number.isInteger(userId) || saveButton.disabled) {
-        return;
-      }
+    const counts = {
+      admin: 0,
+      minister: 0,
+      chamber: 0,
+      citizen: 0,
+    };
 
-      const setRole = async (targetRole) => {
-        saveButton.disabled = true;
-        if (clearButton) {
-          clearButton.disabled = true;
-        }
-
-        try {
-          await api("/api/admin/role", {
-            method: "POST",
-            body: {
-              userId,
-              role: targetRole,
-            },
-          });
-
-          await loadUsers();
-        } catch (error) {
-          appAlert(error.message);
-          saveButton.disabled = false;
-          if (clearButton) {
-            clearButton.disabled = false;
-          }
-        }
-      };
-
-      saveButton.addEventListener("click", async () => {
-        await setRole(select.value);
-      });
-
-      if (clearButton) {
-        clearButton.addEventListener("click", async () => {
-          const ok = await showConfirmModal({
-            title: "Снять роль пользователя?",
-            text: "Назначенная роль будет снята, останется только «гражданин».",
-            confirmText: "Снять роль",
-            cancelText: "Отмена",
-            danger: true,
-          });
-          if (!ok) {
-            return;
-          }
-
-          await setRole("citizen");
-        });
+    allUsers.forEach((user) => {
+      if (counts[user.role] !== undefined) {
+        counts[user.role] += 1;
+      } else {
+        counts.citizen += 1;
       }
     });
+
+    roleStats.innerHTML = [
+      adminRoleStatTemplate("Администраторы", counts.admin, "role-admin"),
+      adminRoleStatTemplate("Министры", counts.minister, "role-minister"),
+      adminRoleStatTemplate("Члены палаты", counts.chamber, "role-chamber"),
+      adminRoleStatTemplate("Граждане", counts.citizen, "role-citizen"),
+    ].join("");
   };
 
-  const renderUsers = () => {
+  const getFilteredUsers = () => {
     const query = (searchInput?.value || "").trim().toLowerCase();
-    const filteredUsers = allUsers.filter((user) => {
+    const roleValue = String(roleFilter?.value || "all");
+    const sortValue = String(sortSelect?.value || "role_name");
+
+    const filtered = allUsers.filter((user) => {
+      if (roleValue !== "all" && user.role !== roleValue) {
+        return false;
+      }
+
       if (!query) {
         return true;
       }
 
       return (
         user.username.toLowerCase().includes(query) ||
-        roleLabel(user.role).toLowerCase().includes(query)
+        roleLabel(user.role).toLowerCase().includes(query) ||
+        String(user.id).includes(query)
       );
     });
+
+    filtered.sort((a, b) => {
+      if (sortValue === "name_asc") {
+        return a.username.localeCompare(b.username, "ru", { sensitivity: "base" });
+      }
+
+      if (sortValue === "newest") {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      }
+
+      if (sortValue === "oldest") {
+        return new Date(a.createdAt) - new Date(b.createdAt);
+      }
+
+      const roleDiff = adminRolePriority(a.role) - adminRolePriority(b.role);
+      if (roleDiff !== 0) {
+        return roleDiff;
+      }
+
+      return a.username.localeCompare(b.username, "ru", { sensitivity: "base" });
+    });
+
+    return filtered;
+  };
+
+  const findSelectedUser = () => {
+    return allUsers.find((user) => user.id === selectedUserId) || null;
+  };
+
+  const setRoleForUser = async (user, targetRole) => {
+    const fixedAdmin = user.username.toLowerCase() === "nertin0";
+    const roleToSave = fixedAdmin ? "admin" : targetRole;
+
+    if (roleToSave === user.role) {
+      return;
+    }
+
+    const ok = await showConfirmModal({
+      title: "Изменить роль пользователя?",
+      text: `Для ${user.username} будет установлена роль «${roleTitle(roleToSave)}».`,
+      confirmText: "Сохранить",
+      cancelText: "Отмена",
+    });
+
+    if (!ok) {
+      return;
+    }
+
+    try {
+      const result = await api("/api/admin/role", {
+        method: "POST",
+        body: {
+          userId: user.id,
+          role: roleToSave,
+        },
+      });
+
+      allUsers = allUsers.map((item) => (item.id === user.id ? result.user : item));
+      if (state.currentUser?.id === user.id) {
+        state.currentUser = {
+          ...state.currentUser,
+          role: result.user.role,
+        };
+        updateCommonUserUI();
+      }
+
+      await showNoticeModal({
+        title: "Роль обновлена",
+        text: `Пользователю ${result.user.username} назначена роль «${roleTitle(result.user.role)}».`,
+        buttonText: "Понятно",
+      });
+
+      render();
+    } catch (error) {
+      appAlert(error.message);
+    }
+  };
+
+  const bindDetailActions = (user) => {
+    const fixedAdmin = user.username.toLowerCase() === "nertin0";
+    const roleSelect = document.getElementById("adminDetailRoleSelect");
+    const saveButton = document.getElementById("adminDetailSaveBtn");
+    const resetButton = document.getElementById("adminDetailResetBtn");
+
+    if (saveButton && roleSelect && !fixedAdmin) {
+      saveButton.addEventListener("click", async () => {
+        await setRoleForUser(user, roleSelect.value);
+      });
+    }
+
+    if (resetButton && !fixedAdmin) {
+      resetButton.addEventListener("click", async () => {
+        const ok = await showConfirmModal({
+          title: "Сделать гражданином?",
+          text: "Назначенная роль будет снята, останется только «гражданин».",
+          confirmText: "Снять роль",
+          cancelText: "Отмена",
+          danger: true,
+        });
+
+        if (!ok) {
+          return;
+        }
+
+        await setRoleForUser(user, "citizen");
+      });
+    }
+
+    if (!fixedAdmin) {
+      detail.querySelectorAll(".admin-quick-role-btn").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const role = String(button.dataset.role || "");
+          if (!role) {
+            return;
+          }
+          await setRoleForUser(user, role);
+        });
+      });
+    }
+  };
+
+  const renderDetail = () => {
+    const selectedUser = findSelectedUser();
+
+    if (!selectedUser) {
+      detail.innerHTML = '<div class="admin-detail-empty">Выберите пользователя в списке, чтобы открыть управление ролями.</div>';
+      return;
+    }
+
+    detail.innerHTML = adminUserDetailTemplate(selectedUser);
+    bindDetailActions(selectedUser);
+  };
+
+  const renderList = () => {
+    const filteredUsers = getFilteredUsers();
 
     if (usersCount) {
       usersCount.textContent = String(filteredUsers.length);
     }
 
     if (filteredUsers.length === 0) {
+      selectedUserId = null;
       list.innerHTML = '<p class="empty-message">Пользователи не найдены.</p>';
+      renderDetail();
       return;
     }
 
-    list.innerHTML = filteredUsers.map(adminUserCardTemplate).join("");
-    bindUserCardActions();
-  };
-
-  const loadUsers = async () => {
-    try {
-      const data = await api("/api/admin/users");
-      allUsers = data.users || [];
-      renderUsers();
-    } catch (error) {
-      list.innerHTML = `<p class="empty-message">${escapeHtml(error.message)}</p>`;
+    if (!filteredUsers.some((user) => user.id === selectedUserId)) {
+      selectedUserId = filteredUsers[0].id;
     }
+
+    list.innerHTML = filteredUsers.map((user) => adminUserListItemTemplate(user, selectedUserId)).join("");
+    renderDetail();
   };
 
-  if (searchInput) {
-    searchInput.addEventListener("input", renderUsers);
-  }
+  const render = () => {
+    updateRoleStats();
+    renderList();
+  };
 
-  await loadUsers();
+  list.addEventListener("click", (event) => {
+    const item = event.target.closest(".admin-member-item");
+    if (!item) {
+      return;
+    }
+
+    const userId = Number.parseInt(item.dataset.userId || "", 10);
+    if (!Number.isInteger(userId)) {
+      return;
+    }
+
+    if (selectedUserId === userId) {
+      return;
+    }
+
+    selectedUserId = userId;
+    renderList();
+  });
+
+  searchInput?.addEventListener("input", renderList);
+  roleFilter?.addEventListener("change", renderList);
+  sortSelect?.addEventListener("change", renderList);
+
+  try {
+    const data = await api("/api/admin/users");
+    allUsers = data.users || [];
+    selectedUserId = allUsers[0]?.id || null;
+    render();
+  } catch (error) {
+    list.innerHTML = `<p class="empty-message">${escapeHtml(error.message)}</p>`;
+    detail.innerHTML = '<div class="admin-detail-empty">Не удалось загрузить пользователей.</div>';
+  }
 }
 
 async function bootstrap() {
