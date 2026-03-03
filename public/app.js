@@ -3,6 +3,9 @@ const ROLE_CHAMBER = "chamber";
 const ROLE_MINISTER = "minister";
 const ROLE_CITIZEN = "citizen";
 
+const MOSCOW_TIME_ZONE = "Europe/Moscow";
+const MOSCOW_UTC_OFFSET_MINUTES = 180;
+
 const state = {
   currentUser: null,
   notifications: [],
@@ -51,6 +54,19 @@ function normalizeDisplayText(value, options = {}) {
   }
 
   return normalizedLines.join("\n");
+}
+
+function shortenSingleLineText(value, maxLength = 120) {
+  const text = normalizeDisplayText(value, { multiline: false });
+  if (!text) {
+    return "";
+  }
+
+  if (text.length <= maxLength) {
+    return text;
+  }
+
+  return `${text.slice(0, Math.max(1, maxLength - 3)).trimEnd()}...`;
 }
 
 function proposalSkeletonTemplate(count = 4) {
@@ -176,6 +192,26 @@ function safeAvatar(url, size = 40) {
   return `/placeholder.svg?height=${size}&width=${size}`;
 }
 
+function moscowParts(date) {
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: MOSCOW_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  })
+    .formatToParts(date)
+    .reduce((acc, part) => {
+      if (part.type !== "literal") {
+        acc[part.type] = part.value;
+      }
+      return acc;
+    }, {});
+}
+
 function formatDateTime(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
@@ -188,12 +224,36 @@ function formatDateTime(value) {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: MOSCOW_TIME_ZONE,
   }).format(date);
 }
 
-function toLocalDateTimeValue(date) {
-  const pad = (number) => String(number).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+function toMoscowDateTimeValue(date) {
+  const parts = moscowParts(date);
+  return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
+}
+
+function parseMoscowDateTimeInput(value) {
+  const match = String(value || "").trim().match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/);
+  if (!match) {
+    return null;
+  }
+
+  const [, y, m, d, h, min] = match;
+  const year = Number.parseInt(y, 10);
+  const month = Number.parseInt(m, 10);
+  const day = Number.parseInt(d, 10);
+  const hour = Number.parseInt(h, 10);
+  const minute = Number.parseInt(min, 10);
+
+  const utcMs = Date.UTC(year, month - 1, day, hour - MOSCOW_UTC_OFFSET_MINUTES / 60, minute);
+  const result = new Date(utcMs);
+
+  if (Number.isNaN(result.getTime())) {
+    return null;
+  }
+
+  return result;
 }
 
 function getStatusMeta(proposal) {
@@ -390,7 +450,10 @@ function ensureNotificationsUI() {
     popover.innerHTML = `
       <div class="notifications-header">
         <h3>Уведомления</h3>
-        <button class="notifications-mark-all" type="button" id="notificationsMarkAll">Прочитать все</button>
+        <div class="notifications-header-actions">
+          <button class="notifications-open-page" type="button" id="notificationsOpenPage">Открыть страницу</button>
+          <button class="notifications-mark-all" type="button" id="notificationsMarkAll">Прочитать все</button>
+        </div>
       </div>
       <div class="notifications-list" id="notificationsList">
         <p class="empty-message compact-empty">Нет уведомлений</p>
@@ -405,6 +468,7 @@ function ensureNotificationsUI() {
     popover,
     list: popover.querySelector("#notificationsList"),
     markAllButton: popover.querySelector("#notificationsMarkAll"),
+    openPageButton: popover.querySelector("#notificationsOpenPage"),
   };
 }
 
@@ -447,11 +511,13 @@ function renderNotifications() {
   ui.list.innerHTML = state.notifications
     .map((item) => {
       const href = typeof item.href === "string" && item.href.startsWith("/") ? item.href : "";
+      const title = shortenSingleLineText(item.title, 64);
+      const message = shortenSingleLineText(item.message, 96);
       return `
         <button class="notification-item ${item.isRead ? "" : "unread"}" type="button" data-id="${item.id}" data-href="${escapeHtml(href)}">
-          <div class="notification-item-title">${escapeHtml(item.title)}</div>
-          <div class="notification-item-message">${escapeHtml(item.message)}</div>
-          <div class="notification-item-time">${formatDateTime(item.createdAt)}</div>
+          <div class="notification-item-title" title="${escapeHtml(item.title)}">${escapeHtml(title)}</div>
+          <div class="notification-item-message" title="${escapeHtml(item.message)}">${escapeHtml(message)}</div>
+          <div class="notification-item-time">${formatDateTime(item.createdAt)} МСК</div>
         </button>
       `;
     })
@@ -562,6 +628,12 @@ function bindNotifications() {
     }
   });
 
+  ui.openPageButton?.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    window.location.href = "/notifications";
+  });
+
   ui.markAllButton?.addEventListener("click", async (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -653,27 +725,59 @@ function hideAuthRequired() {
   }
 }
 
-function showVoteConfirmModal(voteText) {
-  const modal = document.getElementById("voteConfirmModal");
-  const text = document.getElementById("voteConfirmText");
-  const confirmButton = document.getElementById("voteConfirmSubmit");
-  const cancelButton = document.getElementById("voteConfirmCancel");
-
-  if (!modal || !text || !confirmButton || !cancelButton) {
-    const fallbackText = `Подтвердите выбор: «${voteText}». После отправки изменить голос нельзя.`;
-    return Promise.resolve(window.confirm(fallbackText));
+function ensureConfirmModal() {
+  let modal = document.getElementById("confirmModal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "confirmModal";
+    modal.className = "modal";
+    modal.innerHTML = `
+      <div class="modal-content confirm-modal-content">
+        <h2 class="modal-title" id="confirmModalTitle">Подтвердите действие</h2>
+        <p class="modal-text" id="confirmModalText">Это действие требует подтверждения.</p>
+        <div class="form-actions confirm-modal-actions">
+          <button class="btn btn-secondary" type="button" id="confirmModalCancel">Отмена</button>
+          <button class="btn btn-primary" type="button" id="confirmModalSubmit">Подтвердить</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
   }
 
-  text.textContent = `Вы выбрали: «${voteText}». После отправки изменить голос нельзя.`;
-  modal.classList.add("active");
+  return {
+    modal,
+    title: modal.querySelector("#confirmModalTitle"),
+    text: modal.querySelector("#confirmModalText"),
+    submit: modal.querySelector("#confirmModalSubmit"),
+    cancel: modal.querySelector("#confirmModalCancel"),
+  };
+}
+
+function showConfirmModal(options = {}) {
+  const ui = ensureConfirmModal();
+  const modalTitle = String(options.title || "Подтвердите действие");
+  const modalText = String(options.text || "Это действие требует подтверждения.");
+  const confirmText = String(options.confirmText || "Подтвердить");
+  const cancelText = String(options.cancelText || "Отмена");
+  const danger = Boolean(options.danger);
+
+  ui.title.textContent = modalTitle;
+  ui.text.textContent = modalText;
+  ui.submit.textContent = confirmText;
+  ui.cancel.textContent = cancelText;
+
+  ui.submit.classList.remove("btn-primary", "btn-danger");
+  ui.submit.classList.add(danger ? "btn-danger" : "btn-primary");
+
+  ui.modal.classList.add("active");
 
   return new Promise((resolve) => {
     let resolved = false;
 
     const cleanup = () => {
-      confirmButton.removeEventListener("click", onConfirm);
-      cancelButton.removeEventListener("click", onCancel);
-      modal.removeEventListener("click", onBackdropClick);
+      ui.submit.removeEventListener("click", onConfirm);
+      ui.cancel.removeEventListener("click", onCancel);
+      ui.modal.removeEventListener("click", onBackdropClick);
       document.removeEventListener("keydown", onEscape);
     };
 
@@ -683,7 +787,7 @@ function showVoteConfirmModal(voteText) {
       }
 
       resolved = true;
-      modal.classList.remove("active");
+      ui.modal.classList.remove("active");
       cleanup();
       resolve(value);
     };
@@ -699,7 +803,7 @@ function showVoteConfirmModal(voteText) {
     };
 
     const onBackdropClick = (event) => {
-      if (event.target === modal) {
+      if (event.target === ui.modal) {
         finish(false);
       }
     };
@@ -710,11 +814,20 @@ function showVoteConfirmModal(voteText) {
       }
     };
 
-    confirmButton.addEventListener("click", onConfirm);
-    cancelButton.addEventListener("click", onCancel);
-    modal.addEventListener("click", onBackdropClick);
+    ui.submit.addEventListener("click", onConfirm);
+    ui.cancel.addEventListener("click", onCancel);
+    ui.modal.addEventListener("click", onBackdropClick);
     document.addEventListener("keydown", onEscape);
-    confirmButton.focus();
+    ui.submit.focus();
+  });
+}
+
+function showVoteConfirmModal(voteText) {
+  return showConfirmModal({
+    title: "Подтвердите голос",
+    text: `Вы выбрали: «${voteText}». После отправки изменить голос нельзя.`,
+    confirmText: "Подтвердить",
+    cancelText: "Отмена",
   });
 }
 
@@ -989,14 +1102,35 @@ async function initProposalBoard(scope, options) {
   }
 }
 
-async function initHomePage() {
-  await initProposalBoard("public", {
-    createButtonId: "createPetitionBtn",
-    createUrl: "/create-petition?scope=public",
-    canCreate: (user) => Boolean(user),
-  });
+async function loadHomeStats() {
+  const usersCountEl = document.getElementById("heroUsersCount");
+  const proposalsCountEl = document.getElementById("heroProposalsCount");
+  if (!usersCountEl || !proposalsCountEl) {
+    return;
+  }
+
+  try {
+    const stats = await api("/api/stats/public");
+    const usersCount = Number(stats.usersCount || 0);
+    const proposalsCount = Number(stats.proposalsCount || 0);
+    usersCountEl.textContent = `${usersCount}+`;
+    proposalsCountEl.textContent = String(proposalsCount);
+  } catch (error) {
+    usersCountEl.textContent = "0+";
+    proposalsCountEl.textContent = "0";
+  }
 }
 
+async function initHomePage() {
+  await Promise.all([
+    initProposalBoard("public", {
+      createButtonId: "createPetitionBtn",
+      createUrl: "/create-petition?scope=public",
+      canCreate: (user) => Boolean(user),
+    }),
+    loadHomeStats(),
+  ]);
+}
 async function initMinisterPage() {
   await initProposalBoard("minister", {
     createButtonId: "createMinisterProposalBtn",
@@ -1283,9 +1417,13 @@ async function initDetailPage() {
 
       if (deleteProposalButton) {
         deleteProposalButton.addEventListener("click", async () => {
-          const ok = window.confirm(
-            `Удалить голосование #${formatProposalId(proposal)}? Это действие необратимо.`
-          );
+          const ok = await showConfirmModal({
+            title: "Удалить голосование?",
+            text: `Голосование #${formatProposalId(proposal)} будет удалено без возможности восстановления.`,
+            confirmText: "Удалить",
+            cancelText: "Отмена",
+            danger: true,
+          });
           if (!ok) {
             return;
           }
@@ -1385,8 +1523,8 @@ async function initCreatePage() {
   if (deadlineInput) {
     const minDate = new Date(Date.now() + 5 * 60 * 1000);
     const defaultDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    deadlineInput.min = toLocalDateTimeValue(minDate);
-    deadlineInput.value = toLocalDateTimeValue(defaultDate);
+    deadlineInput.min = toMoscowDateTimeValue(minDate);
+    deadlineInput.value = toMoscowDateTimeValue(defaultDate);
   }
 
   if (cancelButton) {
@@ -1417,8 +1555,8 @@ async function initCreatePage() {
       return;
     }
 
-    const deadlineAt = new Date(deadlineRaw);
-    if (Number.isNaN(deadlineAt.getTime())) {
+    const deadlineAt = parseMoscowDateTimeInput(deadlineRaw);
+    if (!(deadlineAt instanceof Date) || Number.isNaN(deadlineAt.getTime())) {
       alert("Некорректная дата дедлайна.");
       return;
     }
@@ -1552,7 +1690,7 @@ function registryCardTemplate(entry) {
   const safeReason = normalizeDisplayText(entry.reason, { multiline: false });
 
   return `
-    <article class="petition-card registry-card" data-entry-id="${entry.id}" tabindex="0" role="button" aria-label="Открыть запись «${escapeHtml(safeTitle)}»">
+    <a class="petition-card registry-card" href="/registry-detail?id=${entry.id}" aria-label="Открыть запись «${escapeHtml(safeTitle)}»">
       <div class="petition-card-header">
         <img src="${safeAvatar(entry.author.avatarUrl, 48)}" alt="${escapeHtml(entry.author.username)}" class="petition-card-icon">
         <div class="petition-card-owner">${escapeHtml(entry.author.username)}</div>
@@ -1566,163 +1704,20 @@ function registryCardTemplate(entry) {
       <p class="petition-card-description">${escapeHtml(safeBody)}</p>
       ${safeReason ? `<p class="registry-reason"><strong>Комментарий:</strong> ${escapeHtml(safeReason)}</p>` : ""}
       <div class="petition-card-meta">
-        <span>${formatDateTime(entry.createdAt)}</span>
+        <span>${formatDateTime(entry.createdAt)} МСК</span>
         <span class="registry-open-hint">Открыть полностью</span>
       </div>
-    </article>
+    </a>
   `;
 }
 
 async function initRegistryPage() {
   const form = document.getElementById("registryForm");
   const list = document.getElementById("registryList");
-  const modal = document.getElementById("registryEntryModal");
-  const modalClose = document.getElementById("registryModalClose");
-  const modalTitle = document.getElementById("registryModalTitle");
-  const modalDecision = document.getElementById("registryModalDecision");
-  const modalAuthor = document.getElementById("registryModalAuthor");
-  const modalDate = document.getElementById("registryModalDate");
-  const modalBody = document.getElementById("registryModalBody");
-  const modalReason = document.getElementById("registryModalReason");
-  const modalReasonRow = document.getElementById("registryModalReasonRow");
-  const modalActions = document.getElementById("registryModalActions");
-  const modalDeleteButton = document.getElementById("registryDeleteBtn");
   const canCreate = isAdmin() || isMinister();
-  const canDelete = isAdmin();
-  let entriesById = new Map();
-  let activeEntryId = null;
 
   if (form) {
     form.style.display = canCreate ? "block" : "none";
-  }
-
-  const closeModal = () => {
-    if (modal) {
-      modal.classList.remove("active");
-    }
-    activeEntryId = null;
-  };
-
-  const openEntry = (entryId) => {
-    const entry = entriesById.get(entryId);
-    if (!entry || !modal) {
-      return;
-    }
-    activeEntryId = entryId;
-
-    if (modalTitle) {
-      modalTitle.textContent = normalizeDisplayText(entry.title, { multiline: false });
-    }
-
-    if (modalDecision) {
-      modalDecision.textContent = entry.decision === "accepted" ? "Принято" : "Отклонено";
-      modalDecision.classList.remove("badge-success", "badge-danger");
-      modalDecision.classList.add(entry.decision === "accepted" ? "badge-success" : "badge-danger");
-    }
-
-    if (modalAuthor) {
-      modalAuthor.textContent = entry.author.username;
-    }
-
-    if (modalDate) {
-      modalDate.textContent = formatDateTime(entry.createdAt);
-    }
-
-    if (modalBody) {
-      modalBody.textContent = normalizeDisplayText(entry.body);
-    }
-
-    if (modalReasonRow) {
-      modalReasonRow.style.display = entry.reason ? "block" : "none";
-    }
-
-    if (modalReason) {
-      modalReason.textContent = normalizeDisplayText(entry.reason || "", { multiline: false });
-    }
-
-    if (modalActions) {
-      modalActions.style.display = canDelete ? "flex" : "none";
-    }
-
-    modal.classList.add("active");
-  };
-
-  if (list) {
-    list.addEventListener("click", (event) => {
-      const card = event.target.closest(".registry-card");
-      if (!card) {
-        return;
-      }
-
-      const entryId = Number.parseInt(card.dataset.entryId || "", 10);
-      if (Number.isInteger(entryId)) {
-        openEntry(entryId);
-      }
-    });
-
-    list.addEventListener("keydown", (event) => {
-      if (event.key !== "Enter" && event.key !== " ") {
-        return;
-      }
-
-      const card = event.target.closest(".registry-card");
-      if (!card) {
-        return;
-      }
-
-      event.preventDefault();
-      const entryId = Number.parseInt(card.dataset.entryId || "", 10);
-      if (Number.isInteger(entryId)) {
-        openEntry(entryId);
-      }
-    });
-  }
-
-  if (modalClose) {
-    modalClose.addEventListener("click", closeModal);
-  }
-
-  if (modal) {
-    modal.addEventListener("click", (event) => {
-      if (event.target === modal) {
-        closeModal();
-      }
-    });
-  }
-
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      closeModal();
-    }
-  });
-
-  if (modalDeleteButton && canDelete) {
-    modalDeleteButton.addEventListener("click", async () => {
-      if (!Number.isInteger(activeEntryId) || activeEntryId <= 0) {
-        return;
-      }
-
-      const entry = entriesById.get(activeEntryId);
-      const title = entry ? entry.title : `#${activeEntryId}`;
-      const ok = window.confirm(`Удалить запись реестра "${title}"? Это действие необратимо.`);
-      if (!ok) {
-        return;
-      }
-
-      modalDeleteButton.disabled = true;
-      try {
-        await api("/api/registry/delete", {
-          method: "POST",
-          body: { entryId: activeEntryId },
-        });
-        closeModal();
-        await loadEntries();
-      } catch (error) {
-        alert(error.message);
-      } finally {
-        modalDeleteButton.disabled = false;
-      }
-    });
   }
 
   const loadEntries = async () => {
@@ -1733,7 +1728,6 @@ async function initRegistryPage() {
     try {
       const cached = readCache("wp:registry:entries");
       if (Array.isArray(cached) && cached.length > 0) {
-        entriesById = new Map(cached.map((entry) => [entry.id, entry]));
         list.innerHTML = cached.map(registryCardTemplate).join("");
       } else {
         list.innerHTML = proposalSkeletonTemplate(3);
@@ -1743,17 +1737,14 @@ async function initRegistryPage() {
       const entries = data.entries || [];
 
       if (entries.length === 0) {
-        entriesById = new Map();
         writeCache("wp:registry:entries", []);
         list.innerHTML = '<p class="empty-message">В реестре пока нет записей.</p>';
         return;
       }
 
-      entriesById = new Map(entries.map((entry) => [entry.id, entry]));
       writeCache("wp:registry:entries", entries);
       list.innerHTML = entries.map(registryCardTemplate).join("");
     } catch (error) {
-      entriesById = new Map();
       list.innerHTML = `<p class="empty-message">${escapeHtml(error.message)}</p>`;
     }
   };
@@ -1791,6 +1782,193 @@ async function initRegistryPage() {
   });
 }
 
+async function initRegistryDetailPage() {
+  const params = new URLSearchParams(window.location.search);
+  const entryId = Number.parseInt(params.get("id"), 10);
+
+  if (!Number.isInteger(entryId) || entryId <= 0) {
+    window.location.href = "/registry";
+    return;
+  }
+
+  try {
+    const data = await api(`/api/registry/get?id=${entryId}`);
+    const entry = data.entry;
+
+    const titleEl = document.getElementById("registryDetailTitle");
+    const breadcrumbEl = document.getElementById("registryDetailBreadcrumb");
+    const decisionEl = document.getElementById("registryDetailDecision");
+    const codeEl = document.getElementById("registryDetailCode");
+    const dateEl = document.getElementById("registryDetailDate");
+    const bodyEl = document.getElementById("registryDetailBody");
+    const reasonSectionEl = document.getElementById("registryDetailReasonSection");
+    const reasonEl = document.getElementById("registryDetailReason");
+    const authorEl = document.getElementById("registryDetailAuthor");
+    const authorAvatarEl = document.getElementById("registryDetailAuthorAvatar");
+    const adminActionsEl = document.getElementById("registryDetailAdminActions");
+    const deleteButtonEl = document.getElementById("registryDetailDeleteBtn");
+
+    const safeTitle = normalizeDisplayText(entry.title, { multiline: false });
+
+    if (titleEl) {
+      titleEl.textContent = safeTitle;
+    }
+
+    if (breadcrumbEl) {
+      breadcrumbEl.textContent = safeTitle;
+    }
+
+    if (decisionEl) {
+      decisionEl.textContent = entry.decision === "accepted" ? "Принято" : "Отклонено";
+      decisionEl.classList.remove("expired", "approved");
+      decisionEl.classList.add(entry.decision === "accepted" ? "approved" : "expired");
+    }
+
+    if (codeEl) {
+      codeEl.textContent = `ID: ${String(entry.id).padStart(4, "0")}`;
+    }
+
+    if (dateEl) {
+      dateEl.textContent = `Создано ${formatDateTime(entry.createdAt)} МСК`;
+    }
+
+    if (bodyEl) {
+      bodyEl.textContent = normalizeDisplayText(entry.body);
+    }
+
+    if (reasonSectionEl) {
+      reasonSectionEl.style.display = entry.reason ? "block" : "none";
+    }
+
+    if (reasonEl) {
+      reasonEl.textContent = normalizeDisplayText(entry.reason || "", { multiline: false });
+    }
+
+    if (authorEl) {
+      authorEl.textContent = entry.author.username;
+    }
+
+    if (authorAvatarEl) {
+      authorAvatarEl.src = safeAvatar(entry.author.avatarUrl, 40);
+    }
+
+    if (adminActionsEl) {
+      adminActionsEl.style.display = data.canDelete ? "block" : "none";
+    }
+
+    if (deleteButtonEl && data.canDelete) {
+      deleteButtonEl.addEventListener("click", async () => {
+        const ok = await showConfirmModal({
+          title: "Удалить запись реестра?",
+          text: `Запись «${safeTitle}» будет удалена без возможности восстановления.`,
+          confirmText: "Удалить",
+          cancelText: "Отмена",
+          danger: true,
+        });
+
+        if (!ok) {
+          return;
+        }
+
+        deleteButtonEl.disabled = true;
+        try {
+          await api("/api/registry/delete", {
+            method: "POST",
+            body: { entryId: entry.id },
+          });
+          window.location.href = "/registry";
+        } catch (error) {
+          alert(error.message);
+          deleteButtonEl.disabled = false;
+        }
+      });
+    }
+  } catch (error) {
+    alert(error.message);
+    window.location.href = "/registry";
+  }
+}
+
+function notificationsPageItemTemplate(item) {
+  const href = typeof item.href === "string" && item.href.startsWith("/") ? item.href : "";
+  const title = shortenSingleLineText(item.title, 88);
+  const message = shortenSingleLineText(item.message, 170);
+
+  return `
+    <button class="notification-item notification-page-item ${item.isRead ? "" : "unread"}" type="button" data-id="${item.id}" data-href="${escapeHtml(href)}">
+      <div class="notification-item-title" title="${escapeHtml(item.title)}">${escapeHtml(title)}</div>
+      <div class="notification-item-message" title="${escapeHtml(item.message)}">${escapeHtml(message)}</div>
+      <div class="notification-item-time">${formatDateTime(item.createdAt)} МСК</div>
+    </button>
+  `;
+}
+
+async function initNotificationsPage() {
+  const recentList = document.getElementById("notificationsRecentList");
+  const archiveList = document.getElementById("notificationsArchiveList");
+  const markAllButton = document.getElementById("notificationsPageMarkAll");
+  if (!recentList || !archiveList) {
+    return;
+  }
+
+  const bindListClicks = (container) => {
+    container.addEventListener("click", async (event) => {
+      const button = event.target.closest(".notification-page-item");
+      if (!button) {
+        return;
+      }
+
+      const id = Number.parseInt(button.dataset.id || "", 10);
+      const href = String(button.dataset.href || "").trim();
+      await markNotificationRead(id);
+
+      if (href) {
+        window.location.href = href;
+      }
+    });
+  };
+
+  bindListClicks(recentList);
+  bindListClicks(archiveList);
+
+  markAllButton?.addEventListener("click", async () => {
+    await markAllNotificationsRead();
+    await loadPageNotifications();
+  });
+
+  const loadPageNotifications = async () => {
+    try {
+      const data = await api("/api/notifications/list?limit=300&all=1");
+      const notifications = data.notifications || [];
+      const now = Date.now();
+      const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+
+      const recent = notifications.filter((item) => {
+        const createdAtMs = new Date(item.createdAt).getTime();
+        return Number.isFinite(createdAtMs) && now - createdAtMs <= threeDaysMs;
+      });
+      const archive = notifications.filter((item) => {
+        const createdAtMs = new Date(item.createdAt).getTime();
+        return Number.isFinite(createdAtMs) && now - createdAtMs > threeDaysMs;
+      });
+
+      recentList.innerHTML = recent.length
+        ? recent.map(notificationsPageItemTemplate).join("")
+        : '<p class="empty-message compact-empty">За последние 3 дня уведомлений нет.</p>';
+
+      archiveList.innerHTML = archive.length
+        ? archive.map(notificationsPageItemTemplate).join("")
+        : '<p class="empty-message compact-empty">Архив уведомлений пока пуст.</p>';
+    } catch (error) {
+      const message = `<p class="empty-message">${escapeHtml(error.message)}</p>`;
+      recentList.innerHTML = message;
+      archiveList.innerHTML = "";
+    }
+  };
+
+  await loadPageNotifications();
+}
+
 function adminUserCardTemplate(user) {
   const fixedAdmin = user.username.toLowerCase() === "nertin0";
   const options = fixedAdmin
@@ -1823,7 +2001,7 @@ function adminUserCardTemplate(user) {
             : '<button class="btn btn-secondary clear-role-btn" type="button">Сделать гражданином</button>'
         }
       </div>
-      ${fixedAdmin ? '<p class="page-subtitle">Пользователь `nertin0` всегда администратор.</p>' : ""}
+      ${fixedAdmin ? '<p class="page-subtitle">Пользователь nertin0 всегда администратор.</p>' : ""}
     </article>
   `;
 }
@@ -1886,7 +2064,13 @@ async function initAdminPage() {
 
       if (clearButton) {
         clearButton.addEventListener("click", async () => {
-          const ok = window.confirm("Снять назначенную роль и оставить только «гражданин»?");
+          const ok = await showConfirmModal({
+            title: "Снять роль пользователя?",
+            text: "Назначенная роль будет снята, останется только «гражданин».",
+            confirmText: "Снять роль",
+            cancelText: "Отмена",
+            danger: true,
+          });
           if (!ok) {
             return;
           }
@@ -2019,6 +2203,16 @@ async function bootstrap() {
     return;
   }
 
+  if (page === "registry-detail") {
+    await initRegistryDetailPage();
+    return;
+  }
+
+  if (page === "notifications") {
+    await initNotificationsPage();
+    return;
+  }
+
   if (page === "admin") {
     await initAdminPage();
   }
@@ -2036,3 +2230,4 @@ if (document.readyState === "loading") {
 } else {
   startBootstrap();
 }
+

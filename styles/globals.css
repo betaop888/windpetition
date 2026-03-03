@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@600;700;800&display=swap");
 
 * {
   margin: 0;
@@ -7,7 +7,7 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: "Manrope", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
   background-color: #000000;
   color: #ffffff;
   line-height: 1.6;
@@ -98,33 +98,36 @@ body {
 }
 
 .nav-icon {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 11px;
-  border: 1px solid #27374f;
-  background: linear-gradient(180deg, #121e31 0%, #0d1828 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 5px 12px rgba(0, 0, 0, 0.34);
-  color: #b9cae2;
-  transition: border-color 0.22s ease, color 0.22s ease, box-shadow 0.22s ease;
+  border-radius: 12px;
+  border: 1px solid #2a3a51;
+  background: linear-gradient(180deg, #131f32 0%, #0e1828 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 6px 13px rgba(0, 0, 0, 0.34);
+  color: #c0d2eb;
+  transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .nav-icon svg {
-  width: 20px;
-  height: 20px;
+  width: 21px;
+  height: 21px;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
-.nav-link:hover .nav-icon,
+.nav-link:hover .nav-icon {
+  border-color: #385277;
+  color: #e9f2ff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 0 1px rgba(56, 82, 119, 0.28), 0 8px 18px rgba(8, 18, 34, 0.4);
+}
+
 .nav-link.active .nav-icon {
   border-color: #4197ef;
-  background: linear-gradient(180deg, #162947 0%, #102036 100%);
-  color: #eff6ff;
-  transform: translateY(-0.5px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 0 1px rgba(65, 151, 239, 0.24), 0 8px 18px rgba(8, 18, 34, 0.45);
+  color: #f4f8ff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 0 1px rgba(65, 151, 239, 0.3), 0 10px 20px rgba(8, 18, 34, 0.46);
 }
 
 .nav-label {
@@ -306,12 +309,25 @@ body {
   margin: 0;
 }
 
+.notifications-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.notifications-open-page,
 .notifications-mark-all {
   background: transparent;
   border: none;
   color: #7eb6ff;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   cursor: pointer;
+  padding: 0;
+}
+
+.notifications-open-page:hover,
+.notifications-mark-all:hover {
+  color: #a9d0ff;
 }
 
 .notifications-list {
@@ -342,12 +358,20 @@ body {
   font-size: 0.86rem;
   font-weight: 600;
   margin-bottom: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .notification-item-message {
   font-size: 0.8rem;
   color: #b3bdd1;
   line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
 }
 
 .notification-item-time {
@@ -387,8 +411,39 @@ body {
 .hero-description {
   font-size: 1.1rem;
   color: #999;
-  margin-bottom: 2rem;
+  margin-bottom: 1.1rem;
   line-height: 1.8;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.9rem;
+  flex-wrap: wrap;
+}
+
+.hero-stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.55rem 0.78rem;
+  border-radius: 10px;
+  border: 1px solid #22324a;
+  background: linear-gradient(180deg, rgba(16, 26, 40, 0.86) 0%, rgba(12, 19, 30, 0.9) 100%);
+  min-width: 170px;
+}
+
+.hero-stat-value {
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: #8ac4ff;
+  line-height: 1.2;
+}
+
+.hero-stat-label {
+  font-size: 0.82rem;
+  color: #8b9bb3;
+  line-height: 1.25;
 }
 
 .hero-buttons {
@@ -405,7 +460,7 @@ body {
   background-image:
     url("/kyvald0.png?v=4"),
     url("/Kyvald0.png?v=4");
-  background-size: auto 100%;
+  background-size: auto 106%;
   background-position: center center;
   background-repeat: no-repeat;
 }
@@ -425,7 +480,7 @@ body {
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .btn-primary {
@@ -473,7 +528,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 2rem;
+  margin-bottom: 1.1rem;
 }
 
 .section-title {
@@ -508,7 +563,7 @@ body {
 }
 
 .search-bar {
-  margin-bottom: 2rem;
+  margin-bottom: 1.1rem;
 }
 
 .search-bar input {
@@ -541,7 +596,7 @@ body {
   border-radius: 12px;
   padding: 1.5rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   text-decoration: none;
   color: inherit;
   display: block;
@@ -550,7 +605,7 @@ body {
 
 .petition-card:hover {
   border-color: #2a2a2a;
-  transform: translateY(-2px);
+  box-shadow: 0 0 0 1px rgba(42, 42, 42, 0.32);
 }
 
 .petition-card-header {
@@ -852,7 +907,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.1rem;
   color: #999;
   font-size: 0.95rem;
 }
@@ -929,7 +984,7 @@ body {
 .profile-tabs {
   display: flex;
   gap: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.1rem;
   border-bottom: 1px solid #1a1a1a;
 }
 
@@ -941,7 +996,7 @@ body {
   cursor: pointer;
   font-size: 1rem;
   border-bottom: 2px solid transparent;
-  transition: all 0.2s;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .profile-tab:hover,
@@ -1061,7 +1116,7 @@ body {
 }
 
 .petition-detail-header {
-  margin-bottom: 2rem;
+  margin-bottom: 1.1rem;
 }
 
 .petition-detail-title {
@@ -1108,7 +1163,7 @@ body {
 }
 
 .petition-detail-image {
-  margin-bottom: 2rem;
+  margin-bottom: 1.1rem;
   border-radius: 12px;
   overflow: hidden;
 }
@@ -1123,7 +1178,7 @@ body {
   font-size: 1.1rem;
   line-height: 1.8;
   color: #ccc;
-  margin-bottom: 2rem;
+  margin-bottom: 1.1rem;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   word-break: break-word;
@@ -1134,7 +1189,7 @@ body {
   border: 1px solid #1a1a1a;
   border-radius: 12px;
   padding: 2rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.1rem;
 }
 
 .petition-voting h3 {
@@ -1160,7 +1215,7 @@ body {
   gap: 0.45rem;
   font-size: 0.95rem;
   font-weight: 600;
-  transition: all 0.2s;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .vote-btn:hover {
@@ -1653,7 +1708,7 @@ body {
 }
 
 .registry-form {
-  margin-bottom: 2rem;
+  margin-bottom: 1.1rem;
   position: relative;
   overflow: hidden;
 }
@@ -1681,7 +1736,7 @@ body {
 }
 
 .registry-card:hover {
-  border-color: #3b5f87;
+  border-color: #23364f;
 }
 
 .registry-open-hint {
@@ -1933,5 +1988,54 @@ body {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.44rem;
+  }
+}
+
+.notifications-page-section {
+  max-width: 1280px;
+}
+
+.notifications-page-head {
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.notifications-page-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.notifications-page-group {
+  border: 1px solid #24344a;
+  background: linear-gradient(180deg, #0f1723 0%, #0c131d 100%);
+  border-radius: 12px;
+  padding: 0.9rem;
+}
+
+.notifications-page-group h3 {
+  font-size: 0.92rem;
+  margin-bottom: 0.68rem;
+  color: #dce7f7;
+}
+
+.notifications-page-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.notification-page-item {
+  min-height: 82px;
+}
+
+.registry-detail-layout .petition-detail-description {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+@media (max-width: 1024px) {
+  .notifications-page-groups {
+    grid-template-columns: 1fr;
   }
 }

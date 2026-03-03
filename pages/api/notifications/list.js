@@ -2,6 +2,11 @@ const { getSessionUser } = require("../../../lib/server/auth");
 const { methodNotAllowed, parseInteger, sendJson } = require("../../../lib/server/http");
 const { listNotificationsForUser } = require("../../../lib/server/notifications");
 
+function asBoolean(value) {
+  const normalized = String(value || "").trim().toLowerCase();
+  return normalized === "1" || normalized === "true" || normalized === "yes";
+}
+
 const handler = async function handler(req, res) {
   if (req.method !== "GET") {
     return methodNotAllowed(req, res, ["GET"]);
@@ -14,7 +19,10 @@ const handler = async function handler(req, res) {
     }
 
     const limit = parseInteger(req.query?.limit);
-    const data = await listNotificationsForUser(user.id, Number.isInteger(limit) ? limit : 30);
+    const all = asBoolean(req.query?.all);
+    const data = await listNotificationsForUser(user.id, Number.isInteger(limit) ? limit : 30, {
+      all,
+    });
 
     sendJson(res, 200, data);
   } catch (error) {

@@ -1,4 +1,4 @@
-﻿const { getSessionUser, isChamberMember, isMinister } = require("../../../lib/server/auth");
+const { getSessionUser, isChamberMember, isMinister } = require("../../../lib/server/auth");
 const { ensureSchema, sql } = require("../../../lib/server/db");
 const { methodNotAllowed, readJsonBody, sendJson } = require("../../../lib/server/http");
 const { createNotificationsForUsers, findUserIdsByRoles } = require("../../../lib/server/notifications");
@@ -129,11 +129,13 @@ const handler = async function handler(req, res) {
     `;
 
     const proposalId = insertResult.rows[0].id;
-    const targetIds = await findUserIdsByRoles(["admin", "minister"]);
+    const targetIds = (await findUserIdsByRoles(["admin", "minister"]))
+      .filter((targetId) => targetId !== user.id);
+    const shortTitle = title.length > 72 ? `${title.slice(0, 69)}...` : title;
     await createNotificationsForUsers(targetIds, {
       type: "proposal_created",
       title: "Создано новое голосование",
-      message: `${user.username} создал(а) ${kind === "law" ? "законопроект" : "петицию"}: ${title}`,
+      message: `${user.username} создал(а) ${kind === "law" ? "законопроект" : "петицию"}: ${shortTitle}`,
       href: `/petition-detail?id=${proposalId}`,
     });
 
@@ -152,3 +154,4 @@ const handler = async function handler(req, res) {
 
 module.exports = handler;
 module.exports.default = handler;
+
