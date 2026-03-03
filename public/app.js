@@ -1,4 +1,4 @@
-﻿const ROLE_ADMIN = "admin";
+const ROLE_ADMIN = "admin";
 const ROLE_CHAMBER = "chamber";
 const ROLE_MINISTER = "minister";
 const ROLE_CITIZEN = "citizen";
@@ -822,6 +822,95 @@ function showConfirmModal(options = {}) {
   });
 }
 
+function ensureNoticeModal() {
+  let modal = document.getElementById("noticeModal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "noticeModal";
+    modal.className = "modal";
+    modal.innerHTML = `
+      <div class="modal-content confirm-modal-content notice-modal-content">
+        <h2 class="modal-title" id="noticeModalTitle">Сообщение</h2>
+        <p class="modal-text" id="noticeModalText">Операция выполнена.</p>
+        <div class="form-actions confirm-modal-actions notice-modal-actions">
+          <button class="btn btn-primary" type="button" id="noticeModalSubmit">Понятно</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+
+  return {
+    modal,
+    title: modal.querySelector("#noticeModalTitle"),
+    text: modal.querySelector("#noticeModalText"),
+    submit: modal.querySelector("#noticeModalSubmit"),
+  };
+}
+
+function showNoticeModal(options = {}) {
+  const ui = ensureNoticeModal();
+  const modalTitle = String(options.title || "Сообщение");
+  const modalText = String(options.text || "Операция выполнена.");
+  const buttonText = String(options.buttonText || "Понятно");
+
+  ui.title.textContent = modalTitle;
+  ui.text.textContent = modalText;
+  ui.submit.textContent = buttonText;
+  ui.modal.classList.add("active");
+
+  return new Promise((resolve) => {
+    let resolved = false;
+
+    const cleanup = () => {
+      ui.submit.removeEventListener("click", onClose);
+      ui.modal.removeEventListener("click", onBackdropClick);
+      document.removeEventListener("keydown", onEscape);
+    };
+
+    const finish = () => {
+      if (resolved) {
+        return;
+      }
+
+      resolved = true;
+      ui.modal.classList.remove("active");
+      cleanup();
+      resolve(true);
+    };
+
+    const onClose = (event) => {
+      event.preventDefault();
+      finish();
+    };
+
+    const onBackdropClick = (event) => {
+      if (event.target === ui.modal) {
+        finish();
+      }
+    };
+
+    const onEscape = (event) => {
+      if (event.key === "Escape") {
+        finish();
+      }
+    };
+
+    ui.submit.addEventListener("click", onClose);
+    ui.modal.addEventListener("click", onBackdropClick);
+    document.addEventListener("keydown", onEscape);
+    ui.submit.focus();
+  });
+}
+
+function appAlert(message, title = "Сообщение") {
+  void showNoticeModal({
+    title,
+    text: String(message || ""),
+    buttonText: "Понятно",
+  });
+}
+
 function showVoteConfirmModal(voteText) {
   return showConfirmModal({
     title: "Подтвердите голос",
@@ -848,7 +937,7 @@ function bindLogoutButton() {
     try {
       await api("/api/auth/logout", { method: "POST" });
     } catch (error) {
-      alert(error.message);
+      appAlert(error.message);
     }
 
     window.location.href = "/";
@@ -1289,7 +1378,7 @@ function updateVotingBlock(proposal) {
         votingButtons.forEach((item) => {
           item.disabled = false;
         });
-        alert(error.message);
+        appAlert(error.message);
       }
     });
   });
@@ -1434,10 +1523,14 @@ async function initDetailPage() {
               method: "POST",
               body: { proposalId: proposal.id },
             });
-            alert("Голосование удалено.");
+            await showNoticeModal({
+              title: "Голосование удалено",
+              text: "Голосование успешно удалено.",
+              buttonText: "Понятно",
+            });
             window.location.href = proposal.scope === "minister" ? "/minister" : "/";
           } catch (error) {
-            alert(error.message);
+            appAlert(error.message);
             deleteProposalButton.disabled = false;
           }
         });
@@ -1446,7 +1539,7 @@ async function initDetailPage() {
       adminActionsSection.style.display = "none";
     }
   } catch (error) {
-    alert(error.message);
+    appAlert(error.message);
     window.location.href = "/";
   }
 }
@@ -1456,7 +1549,7 @@ async function initCreatePage() {
   const scope = params.get("scope") === "minister" ? "minister" : "public";
 
   if (scope === "minister" && !isMinister()) {
-    alert("Недостаточно прав для этого раздела.");
+    appAlert("Недостаточно прав для этого раздела.");
     window.location.href = "/";
     return;
   }
@@ -1546,18 +1639,18 @@ async function initCreatePage() {
     const deadlineRaw = document.getElementById("proposalDeadline")?.value || "";
 
     if (scope === "public" && kind === "law" && !isChamberMember()) {
-      alert("Для создания законопроекта нужна роль «член палаты».");
+      appAlert("Для создания законопроекта нужна роль «член палаты».");
       return;
     }
 
     if (!deadlineRaw) {
-      alert("Укажите дедлайн голосования.");
+      appAlert("Укажите дедлайн голосования.");
       return;
     }
 
     const deadlineAt = parseMoscowDateTimeInput(deadlineRaw);
     if (!(deadlineAt instanceof Date) || Number.isNaN(deadlineAt.getTime())) {
-      alert("Некорректная дата дедлайна.");
+      appAlert("Некорректная дата дедлайна.");
       return;
     }
 
@@ -1579,7 +1672,7 @@ async function initCreatePage() {
 
       window.location.href = `/petition-detail?id=${result.proposalId}`;
     } catch (error) {
-      alert(error.message);
+      appAlert(error.message);
       if (submitButton) {
         submitButton.disabled = false;
       }
@@ -1616,10 +1709,10 @@ async function initProfilePage() {
         profileUser = foundUser;
         isForeignProfile = true;
       } else {
-        alert("Пользователь не найден.");
+        appAlert("Пользователь не найден.");
       }
     } catch (error) {
-      alert(error.message);
+      appAlert(error.message);
     }
   }
 
@@ -1777,7 +1870,7 @@ async function initRegistryPage() {
       form.reset();
       await loadEntries();
     } catch (error) {
-      alert(error.message);
+      appAlert(error.message);
     }
   });
 }
@@ -1876,15 +1969,20 @@ async function initRegistryDetailPage() {
             method: "POST",
             body: { entryId: entry.id },
           });
+          await showNoticeModal({
+            title: "Запись удалена",
+            text: "Запись реестра успешно удалена.",
+            buttonText: "Понятно",
+          });
           window.location.href = "/registry";
         } catch (error) {
-          alert(error.message);
+          appAlert(error.message);
           deleteButtonEl.disabled = false;
         }
       });
     }
   } catch (error) {
-    alert(error.message);
+    appAlert(error.message);
     window.location.href = "/registry";
   }
 }
@@ -2008,7 +2106,7 @@ function adminUserCardTemplate(user) {
 
 async function initAdminPage() {
   if (!isAdmin()) {
-    alert("Недостаточно прав для доступа к админ-панели.");
+    appAlert("Недостаточно прав для доступа к админ-панели.");
     window.location.href = "/";
     return;
   }
@@ -2050,7 +2148,7 @@ async function initAdminPage() {
 
           await loadUsers();
         } catch (error) {
-          alert(error.message);
+          appAlert(error.message);
           saveButton.disabled = false;
           if (clearButton) {
             clearButton.disabled = false;
@@ -2143,7 +2241,7 @@ async function bootstrap() {
 
   const authFailed = new URLSearchParams(window.location.search).get("auth") === "failed";
   if (authFailed) {
-    alert("Не удалось выполнить вход через Discord. Попробуйте снова.");
+    appAlert("Не удалось выполнить вход через Discord. Попробуйте снова.");
   }
 
   const startNotificationsLoad = () => {
@@ -2221,7 +2319,7 @@ async function bootstrap() {
 function startBootstrap() {
   bootstrap().catch((error) => {
     console.error("Bootstrap failed", error);
-    alert("Ошибка загрузки приложения.");
+    appAlert("Ошибка загрузки приложения.");
   });
 }
 
