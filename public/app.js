@@ -159,18 +159,18 @@ function isChamberMember(user = state.currentUser) {
 
 function roleLabel(role) {
   if (role === ROLE_ADMIN) {
-    return "Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ";
+    return "администратор";
   }
 
   if (role === ROLE_MINISTER) {
-    return "РјРёРЅРёСЃС‚СЂ";
+    return "министр";
   }
 
   if (role === ROLE_CHAMBER) {
-    return "С‡Р»РµРЅ РїР°Р»Р°С‚С‹";
+    return "член палаты";
   }
 
-  return "РіСЂР°Р¶РґР°РЅРёРЅ";
+  return "гражданин";
 }
 
 function roleTitle(role) {
@@ -204,20 +204,20 @@ function roleBadgeTemplate(role) {
 }
 
 function proposalKindLabel(kind) {
-  return kind === "law" ? "Р—Р°РєРѕРЅРѕРїСЂРѕРµРєС‚" : "РџРµС‚РёС†РёСЏ";
+  return kind === "law" ? "Законопроект" : "Петиция";
 }
 
 function voteLabel(value) {
   if (value === "for") {
-    return "Р—Р°";
+    return "За";
   }
 
   if (value === "against") {
-    return "РџСЂРѕС‚РёРІ";
+    return "Против";
   }
 
   if (value === "abstain") {
-    return "Р’РѕР·РґРµСЂР¶Р°Р»СЃСЏ";
+    return "Воздержался";
   }
 
   return "-";
@@ -298,7 +298,7 @@ function parseMoscowDateTimeInput(value) {
 function getStatusMeta(proposal) {
   if (proposal.status === "sent_review") {
     return {
-      text: "РћС‚РїСЂР°РІР»РµРЅРѕ РЅР° СЂР°СЃСЃРјРѕС‚СЂРµРЅРёРµ",
+      text: "Отправлено на рассмотрение",
       indicatorClass: "approved",
       statusClass: "approved",
     };
@@ -306,14 +306,14 @@ function getStatusMeta(proposal) {
 
   if (proposal.status === "rejected") {
     return {
-      text: "РћС‚РєР»РѕРЅРµРЅРѕ",
+      text: "Отклонено",
       indicatorClass: "expired",
       statusClass: "expired",
     };
   }
 
   return {
-    text: `Р”Рѕ ${formatDateTime(proposal.deadlineAt)}`,
+    text: `До ${formatDateTime(proposal.deadlineAt)}`,
     indicatorClass: "",
     statusClass: "",
   };
@@ -488,14 +488,14 @@ function ensureNotificationsUI() {
     popover.className = "notifications-popover";
     popover.innerHTML = `
       <div class="notifications-header">
-        <h3>РЈРІРµРґРѕРјР»РµРЅРёСЏ</h3>
+        <h3>Уведомления</h3>
         <div class="notifications-header-actions">
-          <button class="notifications-open-page" type="button" id="notificationsOpenPage">РћС‚РєСЂС‹С‚СЊ СЃС‚СЂР°РЅРёС†Сѓ</button>
-          <button class="notifications-mark-all" type="button" id="notificationsMarkAll">РџСЂРѕС‡РёС‚Р°С‚СЊ РІСЃРµ</button>
+          <button class="notifications-open-page" type="button" id="notificationsOpenPage">Открыть страницу</button>
+          <button class="notifications-mark-all" type="button" id="notificationsMarkAll">Прочитать все</button>
         </div>
       </div>
       <div class="notifications-list" id="notificationsList">
-        <p class="empty-message compact-empty">РќРµС‚ СѓРІРµРґРѕРјР»РµРЅРёР№</p>
+        <p class="empty-message compact-empty">Нет уведомлений</p>
       </div>
     `;
     navUser.appendChild(popover);
@@ -533,17 +533,17 @@ function renderNotifications() {
   }
 
   if (!state.currentUser) {
-    ui.list.innerHTML = '<p class="empty-message compact-empty">Р’РѕР№РґРёС‚Рµ С‡РµСЂРµР· Discord, С‡С‚РѕР±С‹ РІРёРґРµС‚СЊ СѓРІРµРґРѕРјР»РµРЅРёСЏ.</p>';
+    ui.list.innerHTML = '<p class="empty-message compact-empty">Войдите через Discord, чтобы видеть уведомления.</p>';
     return;
   }
 
   if (!state.notificationsLoaded) {
-    ui.list.innerHTML = '<p class="empty-message compact-empty">Р—Р°РіСЂСѓР·РєР°...</p>';
+    ui.list.innerHTML = '<p class="empty-message compact-empty">Загрузка...</p>';
     return;
   }
 
   if (!state.notifications.length) {
-    ui.list.innerHTML = '<p class="empty-message compact-empty">РќРµС‚ СѓРІРµРґРѕРјР»РµРЅРёР№</p>';
+    ui.list.innerHTML = '<p class="empty-message compact-empty">Нет уведомлений</p>';
     return;
   }
 
@@ -556,7 +556,7 @@ function renderNotifications() {
         <button class="notification-item ${item.isRead ? "" : "unread"}" type="button" data-id="${item.id}" data-href="${escapeHtml(href)}">
           <div class="notification-item-title" title="${escapeHtml(item.title)}">${escapeHtml(title)}</div>
           <div class="notification-item-message" title="${escapeHtml(item.message)}">${escapeHtml(message)}</div>
-          <div class="notification-item-time">${formatDateTime(item.createdAt)} РњРЎРљ</div>
+          <div class="notification-item-time">${formatDateTime(item.createdAt)} МСК</div>
         </button>
       `;
     })
@@ -655,7 +655,7 @@ function bindNotifications() {
     event.stopPropagation();
 
     if (!state.currentUser) {
-      showAuthRequired("Р”Р»СЏ СѓРІРµРґРѕРјР»РµРЅРёР№ РІРѕР№РґРёС‚Рµ С‡РµСЂРµР· Discord.");
+      showAuthRequired("Для уведомлений войдите через Discord.");
       return;
     }
 
@@ -749,7 +749,7 @@ function showAuthRequired(message) {
   const text = document.getElementById("authRequiredText");
 
   if (text) {
-    text.textContent = message || "Р”Р»СЏ СЂР°Р±РѕС‚С‹ СЃ СЃР°Р№С‚РѕРј РІРѕР№РґРёС‚Рµ С‡РµСЂРµР· Discord.";
+    text.textContent = message || "Для работы с сайтом войдите через Discord.";
   }
 
   if (modal) {
@@ -772,11 +772,11 @@ function ensureConfirmModal() {
     modal.className = "modal";
     modal.innerHTML = `
       <div class="modal-content confirm-modal-content">
-        <h2 class="modal-title" id="confirmModalTitle">РџРѕРґС‚РІРµСЂРґРёС‚Рµ РґРµР№СЃС‚РІРёРµ</h2>
-        <p class="modal-text" id="confirmModalText">Р­С‚Рѕ РґРµР№СЃС‚РІРёРµ С‚СЂРµР±СѓРµС‚ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ.</p>
+        <h2 class="modal-title" id="confirmModalTitle">Подтвердите действие</h2>
+        <p class="modal-text" id="confirmModalText">Это действие требует подтверждения.</p>
         <div class="form-actions confirm-modal-actions">
-          <button class="btn btn-secondary" type="button" id="confirmModalCancel">РћС‚РјРµРЅР°</button>
-          <button class="btn btn-primary" type="button" id="confirmModalSubmit">РџРѕРґС‚РІРµСЂРґРёС‚СЊ</button>
+          <button class="btn btn-secondary" type="button" id="confirmModalCancel">Отмена</button>
+          <button class="btn btn-primary" type="button" id="confirmModalSubmit">Подтвердить</button>
         </div>
       </div>
     `;
@@ -794,10 +794,10 @@ function ensureConfirmModal() {
 
 function showConfirmModal(options = {}) {
   const ui = ensureConfirmModal();
-  const modalTitle = String(options.title || "РџРѕРґС‚РІРµСЂРґРёС‚Рµ РґРµР№СЃС‚РІРёРµ");
-  const modalText = String(options.text || "Р­С‚Рѕ РґРµР№СЃС‚РІРёРµ С‚СЂРµР±СѓРµС‚ РїРѕРґС‚РІРµСЂР¶РґРµРЅРёСЏ.");
-  const confirmText = String(options.confirmText || "РџРѕРґС‚РІРµСЂРґРёС‚СЊ");
-  const cancelText = String(options.cancelText || "РћС‚РјРµРЅР°");
+  const modalTitle = String(options.title || "Подтвердите действие");
+  const modalText = String(options.text || "Это действие требует подтверждения.");
+  const confirmText = String(options.confirmText || "Подтвердить");
+  const cancelText = String(options.cancelText || "Отмена");
   const danger = Boolean(options.danger);
 
   ui.title.textContent = modalTitle;
@@ -869,10 +869,10 @@ function ensureNoticeModal() {
     modal.className = "modal";
     modal.innerHTML = `
       <div class="modal-content confirm-modal-content notice-modal-content">
-        <h2 class="modal-title" id="noticeModalTitle">РЎРѕРѕР±С‰РµРЅРёРµ</h2>
-        <p class="modal-text" id="noticeModalText">РћРїРµСЂР°С†РёСЏ РІС‹РїРѕР»РЅРµРЅР°.</p>
+        <h2 class="modal-title" id="noticeModalTitle">Сообщение</h2>
+        <p class="modal-text" id="noticeModalText">Операция выполнена.</p>
         <div class="form-actions confirm-modal-actions notice-modal-actions">
-          <button class="btn btn-primary" type="button" id="noticeModalSubmit">РџРѕРЅСЏС‚РЅРѕ</button>
+          <button class="btn btn-primary" type="button" id="noticeModalSubmit">Понятно</button>
         </div>
       </div>
     `;
@@ -889,9 +889,9 @@ function ensureNoticeModal() {
 
 function showNoticeModal(options = {}) {
   const ui = ensureNoticeModal();
-  const modalTitle = String(options.title || "РЎРѕРѕР±С‰РµРЅРёРµ");
-  const modalText = String(options.text || "РћРїРµСЂР°С†РёСЏ РІС‹РїРѕР»РЅРµРЅР°.");
-  const buttonText = String(options.buttonText || "РџРѕРЅСЏС‚РЅРѕ");
+  const modalTitle = String(options.title || "Сообщение");
+  const modalText = String(options.text || "Операция выполнена.");
+  const buttonText = String(options.buttonText || "Понятно");
 
   ui.title.textContent = modalTitle;
   ui.text.textContent = modalText;
@@ -942,20 +942,20 @@ function showNoticeModal(options = {}) {
   });
 }
 
-function appAlert(message, title = "РЎРѕРѕР±С‰РµРЅРёРµ") {
+function appAlert(message, title = "Сообщение") {
   void showNoticeModal({
     title,
     text: String(message || ""),
-    buttonText: "РџРѕРЅСЏС‚РЅРѕ",
+    buttonText: "Понятно",
   });
 }
 
 function showVoteConfirmModal(voteText) {
   return showConfirmModal({
-    title: "РџРѕРґС‚РІРµСЂРґРёС‚Рµ РіРѕР»РѕСЃ",
-    text: `Р’С‹ РІС‹Р±СЂР°Р»Рё: В«${voteText}В». РџРѕСЃР»Рµ РѕС‚РїСЂР°РІРєРё РёР·РјРµРЅРёС‚СЊ РіРѕР»РѕСЃ РЅРµР»СЊР·СЏ.`,
-    confirmText: "РџРѕРґС‚РІРµСЂРґРёС‚СЊ",
-    cancelText: "РћС‚РјРµРЅР°",
+    title: "Подтвердите голос",
+    text: `Вы выбрали: «${voteText}». После отправки изменить голос нельзя.`,
+    confirmText: "Подтвердить",
+    cancelText: "Отмена",
   });
 }
 
@@ -1019,7 +1019,7 @@ function bindHeroButtons() {
 
   heroProfileButton.addEventListener("click", () => {
     if (!state.currentUser) {
-      showAuthRequired("РЎРЅР°С‡Р°Р»Р° РІРѕР№РґРёС‚Рµ С‡РµСЂРµР· Discord.");
+      showAuthRequired("Сначала войдите через Discord.");
       return;
     }
 
@@ -1106,7 +1106,7 @@ function proposalCardTemplate(proposal) {
       <div class="card-badges">
         <span class="mini-badge mini-badge-id">#${proposalCode}</span>
         <span class="mini-badge">${proposalKindLabel(proposal.kind)}</span>
-        <span class="mini-badge">${proposal.scope === "minister" ? "РњРёРЅРёСЃС‚СЂС‹" : "РџСѓР±Р»РёС‡РЅРѕ"}</span>
+        <span class="mini-badge">${proposal.scope === "minister" ? "Министры" : "Публично"}</span>
       </div>
       <h3 class="petition-card-title">${escapeHtml(safeTitle)}</h3>
       <p class="petition-card-description">${escapeHtml(safeDescription)}</p>
@@ -1119,11 +1119,11 @@ function proposalCardTemplate(proposal) {
           ${
             showVotes
               ? `
-                <span>Р—Р°: ${asVoteNumber(proposal.votes.for)}</span>
-                <span>РџСЂРѕС‚РёРІ: ${asVoteNumber(proposal.votes.against)}</span>
-                <span>Р’РѕР·РґРµСЂР¶.: ${asVoteNumber(proposal.votes.abstain)}</span>
+                <span>За: ${asVoteNumber(proposal.votes.for)}</span>
+                <span>Против: ${asVoteNumber(proposal.votes.against)}</span>
+                <span>Воздерж.: ${asVoteNumber(proposal.votes.abstain)}</span>
               `
-              : '<span class="results-hidden-label">Р РµР·СѓР»СЊС‚Р°С‚С‹ СЃРєСЂС‹С‚С‹ РґРѕ Р·Р°РІРµСЂС€РµРЅРёСЏ РіРѕР»РѕСЃРѕРІР°РЅРёСЏ</span>'
+              : '<span class="results-hidden-label">Результаты скрыты до завершения голосования</span>'
           }
         </div>
       </div>
@@ -1143,7 +1143,7 @@ async function initProposalBoard(scope, options) {
   }
 
   if (scope === "minister" && !isMinister()) {
-    grid.innerHTML = '<p class="empty-message">Р Р°Р·РґРµР» РЅРµРґРѕСЃС‚СѓРїРµРЅ РґР»СЏ РІР°С€РµР№ СЂРѕР»Рё.</p>';
+    grid.innerHTML = '<p class="empty-message">Раздел недоступен для вашей роли.</p>';
     if (createButton) {
       createButton.style.display = "none";
     }
@@ -1186,7 +1186,7 @@ async function initProposalBoard(scope, options) {
     }
 
     if (filtered.length === 0) {
-      grid.innerHTML = '<p class="empty-message">Р“РѕР»РѕСЃРѕРІР°РЅРёСЏ РЅРµ РЅР°Р№РґРµРЅС‹</p>';
+      grid.innerHTML = '<p class="empty-message">Голосования не найдены</p>';
       return;
     }
 
@@ -1222,7 +1222,7 @@ async function initProposalBoard(scope, options) {
     render();
   } catch (error) {
     if (error.status === 401) {
-      showAuthRequired("Р”Р»СЏ РїСЂРѕСЃРјРѕС‚СЂР° РіРѕР»РѕСЃРѕРІР°РЅРёР№ РЅСѓР¶РЅРѕ РІРѕР№С‚Рё С‡РµСЂРµР· Discord.");
+      showAuthRequired("Для просмотра голосований нужно войти через Discord.");
       return;
     }
 
@@ -1274,7 +1274,7 @@ function renderVoteList(listElementId, users) {
   }
 
   if (!users || users.length === 0) {
-    container.innerHTML = '<p class="empty-message compact-empty">РќРµС‚ РіРѕР»РѕСЃРѕРІ</p>';
+    container.innerHTML = '<p class="empty-message compact-empty">Нет голосов</p>';
     return;
   }
 
@@ -1365,7 +1365,7 @@ function updateVotingBlock(proposal) {
 
   if (!isOpen) {
     if (voteMessage) {
-      voteMessage.textContent = "Р“РѕР»РѕСЃРѕРІР°РЅРёРµ Р·Р°РІРµСЂС€РµРЅРѕ.";
+      voteMessage.textContent = "Голосование завершено.";
       voteMessage.classList.add("active");
     }
     return;
@@ -1378,7 +1378,7 @@ function updateVotingBlock(proposal) {
     }
 
     if (voteMessage) {
-      voteMessage.textContent = `Р’Р°С€ РіРѕР»РѕСЃ: ${voteLabel(proposal.myVote)}`;
+      voteMessage.textContent = `Ваш голос: ${voteLabel(proposal.myVote)}`;
       voteMessage.classList.add("active");
     }
 
@@ -1465,7 +1465,7 @@ async function initDetailPage() {
     }
 
     if (petitionDate) {
-      petitionDate.textContent = `РЎРѕР·РґР°РЅРѕ ${formatDateTime(proposal.createdAt)}`;
+      petitionDate.textContent = `Создано ${formatDateTime(proposal.createdAt)}`;
     }
 
     if (petitionStatus) {
@@ -1546,10 +1546,10 @@ async function initDetailPage() {
       if (deleteProposalButton) {
         deleteProposalButton.addEventListener("click", async () => {
           const ok = await showConfirmModal({
-            title: "РЈРґР°Р»РёС‚СЊ РіРѕР»РѕСЃРѕРІР°РЅРёРµ?",
-            text: `Р“РѕР»РѕСЃРѕРІР°РЅРёРµ #${formatProposalId(proposal)} Р±СѓРґРµС‚ СѓРґР°Р»РµРЅРѕ Р±РµР· РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ.`,
-            confirmText: "РЈРґР°Р»РёС‚СЊ",
-            cancelText: "РћС‚РјРµРЅР°",
+            title: "Удалить голосование?",
+            text: `Голосование #${formatProposalId(proposal)} будет удалено без возможности восстановления.`,
+            confirmText: "Удалить",
+            cancelText: "Отмена",
             danger: true,
           });
           if (!ok) {
@@ -1563,9 +1563,9 @@ async function initDetailPage() {
               body: { proposalId: proposal.id },
             });
             await showNoticeModal({
-              title: "Р“РѕР»РѕСЃРѕРІР°РЅРёРµ СѓРґР°Р»РµРЅРѕ",
-              text: "Р“РѕР»РѕСЃРѕРІР°РЅРёРµ СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅРѕ.",
-              buttonText: "РџРѕРЅСЏС‚РЅРѕ",
+              title: "Голосование удалено",
+              text: "Голосование успешно удалено.",
+              buttonText: "Понятно",
             });
             window.location.href = proposal.scope === "minister" ? "/minister" : "/";
           } catch (error) {
@@ -1588,7 +1588,7 @@ async function initCreatePage() {
   const scope = params.get("scope") === "minister" ? "minister" : "public";
 
   if (scope === "minister" && !isMinister()) {
-    appAlert("РќРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ РїСЂР°РІ РґР»СЏ СЌС‚РѕРіРѕ СЂР°Р·РґРµР»Р°.");
+    appAlert("Недостаточно прав для этого раздела.");
     window.location.href = "/";
     return;
   }
@@ -1605,14 +1605,14 @@ async function initCreatePage() {
   const creationLimitText = document.getElementById("creationLimitText");
   const creationLimitTitle = document.getElementById("creationLimitTitle");
 
-  const scopeText = scope === "minister" ? "Р“РѕР»РѕСЃРѕРІР°РЅРёСЏ РјРёРЅРёСЃС‚СЂРѕРІ" : "РџСѓР±Р»РёС‡РЅС‹Рµ РіРѕР»РѕСЃРѕРІР°РЅРёСЏ";
+  const scopeText = scope === "minister" ? "Голосования министров" : "Публичные голосования";
 
   if (createPageTitle) {
-    createPageTitle.textContent = `РЎРѕР·РґР°С‚СЊ: ${scopeText}`;
+    createPageTitle.textContent = `Создать: ${scopeText}`;
   }
 
   if (createPageSubtitle) {
-    createPageSubtitle.textContent = "РџСѓР±Р»РёРєР°С†РёСЏ СЃСЂР°Р·Сѓ СЃС‚Р°РЅРѕРІРёС‚СЃСЏ РґРѕСЃС‚СѓРїРЅР° РІСЃРµРј РїРѕР»СЊР·РѕРІР°С‚РµР»СЏРј РІ РІС‹Р±СЂР°РЅРЅРѕРј СЂР°Р·РґРµР»Рµ.";
+    createPageSubtitle.textContent = "Публикация сразу становится доступна всем пользователям в выбранном разделе.";
   }
 
   if (scopeLabel) {
@@ -1620,20 +1620,20 @@ async function initCreatePage() {
   }
 
   if (resultRuleText) {
-    resultRuleText.textContent = "РџРѕСЃР»Рµ РґРµРґР»Р°Р№РЅР°: РµСЃР»Рё РіРѕР»РѕСЃРѕРІ В«Р—Р°В» Р±РѕР»СЊС€Рµ 50%, СЃС‚Р°С‚СѓСЃ СЃС‚Р°РЅРµС‚ В«РћС‚РїСЂР°РІР»РµРЅРѕ РЅР° СЂР°СЃСЃРјРѕС‚СЂРµРЅРёРµВ», РёРЅР°С‡Рµ В«РћС‚РєР»РѕРЅРµРЅРѕВ».";
+    resultRuleText.textContent = "После дедлайна: если голосов «За» больше 50%, статус станет «Отправлено на рассмотрение», иначе «Отклонено».";
   }
 
   if (creationLimitTitle) {
-    creationLimitTitle.textContent = scope === "minister" ? "РџСЂР°РІРёР»Рѕ СЂР°Р·РґРµР»Р°" : "РћРіСЂР°РЅРёС‡РµРЅРёРµ";
+    creationLimitTitle.textContent = scope === "minister" ? "Правило раздела" : "Ограничение";
   }
 
   if (creationLimitText) {
     creationLimitText.textContent =
       scope === "minister"
-        ? "Р Р°Р·РґРµР» РїСЂРµРґРЅР°Р·РЅР°С‡РµРЅ РґР»СЏ РјРёРЅРёСЃС‚РµСЂСЃРєРёС… РёРЅРёС†РёР°С‚РёРІ. Р“РѕР»РѕСЃРѕРІР°РЅРёРµ РїСЂРѕРІРѕРґРёС‚СЃСЏ СЃСЂРµРґРё РјРёРЅРёСЃС‚СЂРѕРІ."
+        ? "Раздел предназначен для министерских инициатив. Голосование проводится среди министров."
         : isChamberMember()
-          ? "РЎ РѕРґРЅРѕРіРѕ Р°РєРєР°СѓРЅС‚Р° РјРѕР¶РЅРѕ СЃРѕР·РґР°С‚СЊ РґРѕ 2 РїСѓР±Р»РёС‡РЅС‹С… РіРѕР»РѕСЃРѕРІР°РЅРёР№ Р·Р° 24 С‡Р°СЃР°. Р’С‹ РјРѕР¶РµС‚Рµ РїСѓР±Р»РёРєРѕРІР°С‚СЊ РїРµС‚РёС†РёРё Рё Р·Р°РєРѕРЅРѕРїСЂРѕРµРєС‚С‹."
-          : "РЎ РѕРґРЅРѕРіРѕ Р°РєРєР°СѓРЅС‚Р° РјРѕР¶РЅРѕ СЃРѕР·РґР°С‚СЊ РґРѕ 2 РїСѓР±Р»РёС‡РЅС‹С… РіРѕР»РѕСЃРѕРІР°РЅРёР№ Р·Р° 24 С‡Р°СЃР°. Р”Р»СЏ Р·Р°РєРѕРЅРѕРїСЂРѕРµРєС‚РѕРІ РЅСѓР¶РЅР° СЂРѕР»СЊ В«С‡Р»РµРЅ РїР°Р»Р°С‚С‹В».";
+          ? "С одного аккаунта можно создать до 2 публичных голосований за 24 часа. Вы можете публиковать петиции и законопроекты."
+          : "С одного аккаунта можно создать до 2 публичных голосований за 24 часа. Для законопроектов нужна роль «член палаты».";
   }
 
   if (proposalTypeSelect && scope === "public") {
@@ -1641,9 +1641,9 @@ async function initCreatePage() {
     if (lawOption) {
       lawOption.disabled = !isChamberMember();
       if (!isChamberMember()) {
-        lawOption.textContent = "Р—Р°РєРѕРЅРѕРїСЂРѕРµРєС‚ (РЅСѓР¶РЅР° СЂРѕР»СЊ С‡Р»РµРЅР° РїР°Р»Р°С‚С‹)";
+        lawOption.textContent = "Законопроект (нужна роль члена палаты)";
       } else {
-        lawOption.textContent = "Р—Р°РєРѕРЅРѕРїСЂРѕРµРєС‚";
+        lawOption.textContent = "Законопроект";
       }
     }
 
@@ -1678,18 +1678,18 @@ async function initCreatePage() {
     const deadlineRaw = document.getElementById("proposalDeadline")?.value || "";
 
     if (scope === "public" && kind === "law" && !isChamberMember()) {
-      appAlert("Р”Р»СЏ СЃРѕР·РґР°РЅРёСЏ Р·Р°РєРѕРЅРѕРїСЂРѕРµРєС‚Р° РЅСѓР¶РЅР° СЂРѕР»СЊ В«С‡Р»РµРЅ РїР°Р»Р°С‚С‹В».");
+      appAlert("Для создания законопроекта нужна роль «член палаты».");
       return;
     }
 
     if (!deadlineRaw) {
-      appAlert("РЈРєР°Р¶РёС‚Рµ РґРµРґР»Р°Р№РЅ РіРѕР»РѕСЃРѕРІР°РЅРёСЏ.");
+      appAlert("Укажите дедлайн голосования.");
       return;
     }
 
     const deadlineAt = parseMoscowDateTimeInput(deadlineRaw);
     if (!(deadlineAt instanceof Date) || Number.isNaN(deadlineAt.getTime())) {
-      appAlert("РќРµРєРѕСЂСЂРµРєС‚РЅР°СЏ РґР°С‚Р° РґРµРґР»Р°Р№РЅР°.");
+      appAlert("Некорректная дата дедлайна.");
       return;
     }
 
@@ -1748,7 +1748,7 @@ async function initProfilePage() {
         profileUser = foundUser;
         isForeignProfile = true;
       } else {
-        appAlert("РџРѕР»СЊР·РѕРІР°С‚РµР»СЊ РЅРµ РЅР°Р№РґРµРЅ.");
+        appAlert("Пользователь не найден.");
       }
     } catch (error) {
       appAlert(error.message);
@@ -1770,7 +1770,7 @@ async function initProfilePage() {
   const profileRoles = rolesForUser(profileUser);
 
   if (profileRoleLabel) {
-    profileRoleLabel.textContent = profileRoles.length > 1 ? "Р РѕР»Рё РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ" : "Р РѕР»СЊ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ";
+    profileRoleLabel.textContent = profileRoles.length > 1 ? "Роли пользователя" : "Роль пользователя";
   }
 
   if (profileRolesList) {
@@ -1778,7 +1778,7 @@ async function initProfilePage() {
   }
 
   if (profileTab) {
-    profileTab.textContent = isForeignProfile ? "Р“РѕР»РѕСЃРѕРІР°РЅРёСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ" : "РњРѕРё РіРѕР»РѕСЃРѕРІР°РЅРёСЏ";
+    profileTab.textContent = isForeignProfile ? "Голосования пользователя" : "Мои голосования";
   }
 
   try {
@@ -1803,8 +1803,8 @@ async function initProfilePage() {
 
     if (mine.length === 0) {
       userPetitionsList.innerHTML = isForeignProfile
-        ? '<p class="empty-message">РЈ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РїРѕРєР° РЅРµС‚ СЃРѕР·РґР°РЅРЅС‹С… РіРѕР»РѕСЃРѕРІР°РЅРёР№.</p>'
-        : '<p class="empty-message">РЈ РІР°СЃ РїРѕРєР° РЅРµС‚ СЃРѕР·РґР°РЅРЅС‹С… РіРѕР»РѕСЃРѕРІР°РЅРёР№.</p>';
+        ? '<p class="empty-message">У пользователя пока нет созданных голосований.</p>'
+        : '<p class="empty-message">У вас пока нет созданных голосований.</p>';
       return;
     }
 
@@ -1822,22 +1822,22 @@ function registryCardTemplate(entry) {
   const safeReason = normalizeDisplayText(entry.reason, { multiline: false });
 
   return `
-    <a class="petition-card registry-card" href="/registry-detail?id=${entry.id}" aria-label="РћС‚РєСЂС‹С‚СЊ Р·Р°РїРёСЃСЊ В«${escapeHtml(safeTitle)}В»">
+    <a class="petition-card registry-card" href="/registry-detail?id=${entry.id}" aria-label="Открыть запись «${escapeHtml(safeTitle)}»">
       <div class="petition-card-header">
         <img src="${safeAvatar(entry.author.avatarUrl, 48)}" alt="${escapeHtml(entry.author.username)}" class="petition-card-icon">
         <div class="petition-card-owner">${escapeHtml(entry.author.username)}</div>
       </div>
       <div class="card-badges">
         <span class="mini-badge ${entry.decision === "accepted" ? "badge-success" : "badge-danger"}">
-          ${entry.decision === "accepted" ? "РџСЂРёРЅСЏС‚Рѕ" : "РћС‚РєР»РѕРЅРµРЅРѕ"}
+          ${entry.decision === "accepted" ? "Принято" : "Отклонено"}
         </span>
       </div>
       <h3 class="petition-card-title">${escapeHtml(safeTitle)}</h3>
       <p class="petition-card-description">${escapeHtml(safeBody)}</p>
-      ${safeReason ? `<p class="registry-reason"><strong>РљРѕРјРјРµРЅС‚Р°СЂРёР№:</strong> ${escapeHtml(safeReason)}</p>` : ""}
+      ${safeReason ? `<p class="registry-reason"><strong>Комментарий:</strong> ${escapeHtml(safeReason)}</p>` : ""}
       <div class="petition-card-meta">
-        <span>${formatDateTime(entry.createdAt)} РњРЎРљ</span>
-        <span class="registry-open-hint">РћС‚РєСЂС‹С‚СЊ РїРѕР»РЅРѕСЃС‚СЊСЋ</span>
+        <span>${formatDateTime(entry.createdAt)} МСК</span>
+        <span class="registry-open-hint">Открыть полностью</span>
       </div>
     </a>
   `;
@@ -1870,7 +1870,7 @@ async function initRegistryPage() {
 
       if (entries.length === 0) {
         writeCache("wp:registry:entries", []);
-        list.innerHTML = '<p class="empty-message">Р’ СЂРµРµСЃС‚СЂРµ РїРѕРєР° РЅРµС‚ Р·Р°РїРёСЃРµР№.</p>';
+        list.innerHTML = '<p class="empty-message">В реестре пока нет записей.</p>';
         return;
       }
 
@@ -1951,7 +1951,7 @@ async function initRegistryDetailPage() {
     }
 
     if (decisionEl) {
-      decisionEl.textContent = entry.decision === "accepted" ? "РџСЂРёРЅСЏС‚Рѕ" : "РћС‚РєР»РѕРЅРµРЅРѕ";
+      decisionEl.textContent = entry.decision === "accepted" ? "Принято" : "Отклонено";
       decisionEl.classList.remove("expired", "approved");
       decisionEl.classList.add(entry.decision === "accepted" ? "approved" : "expired");
     }
@@ -1961,7 +1961,7 @@ async function initRegistryDetailPage() {
     }
 
     if (dateEl) {
-      dateEl.textContent = `РЎРѕР·РґР°РЅРѕ ${formatDateTime(entry.createdAt)} РњРЎРљ`;
+      dateEl.textContent = `Создано ${formatDateTime(entry.createdAt)} МСК`;
     }
 
     if (bodyEl) {
@@ -1991,10 +1991,10 @@ async function initRegistryDetailPage() {
     if (deleteButtonEl && data.canDelete) {
       deleteButtonEl.addEventListener("click", async () => {
         const ok = await showConfirmModal({
-          title: "РЈРґР°Р»РёС‚СЊ Р·Р°РїРёСЃСЊ СЂРµРµСЃС‚СЂР°?",
-          text: `Р—Р°РїРёСЃСЊ В«${safeTitle}В» Р±СѓРґРµС‚ СѓРґР°Р»РµРЅР° Р±РµР· РІРѕР·РјРѕР¶РЅРѕСЃС‚Рё РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ.`,
-          confirmText: "РЈРґР°Р»РёС‚СЊ",
-          cancelText: "РћС‚РјРµРЅР°",
+          title: "Удалить запись реестра?",
+          text: `Запись «${safeTitle}» будет удалена без возможности восстановления.`,
+          confirmText: "Удалить",
+          cancelText: "Отмена",
           danger: true,
         });
 
@@ -2009,9 +2009,9 @@ async function initRegistryDetailPage() {
             body: { entryId: entry.id },
           });
           await showNoticeModal({
-            title: "Р—Р°РїРёСЃСЊ СѓРґР°Р»РµРЅР°",
-            text: "Р—Р°РїРёСЃСЊ СЂРµРµСЃС‚СЂР° СѓСЃРїРµС€РЅРѕ СѓРґР°Р»РµРЅР°.",
-            buttonText: "РџРѕРЅСЏС‚РЅРѕ",
+            title: "Запись удалена",
+            text: "Запись реестра успешно удалена.",
+            buttonText: "Понятно",
           });
           window.location.href = "/registry";
         } catch (error) {
@@ -2035,7 +2035,7 @@ function notificationsPageItemTemplate(item) {
     <button class="notification-item notification-page-item ${item.isRead ? "" : "unread"}" type="button" data-id="${item.id}" data-href="${escapeHtml(href)}">
       <div class="notification-item-title" title="${escapeHtml(item.title)}">${escapeHtml(title)}</div>
       <div class="notification-item-message" title="${escapeHtml(item.message)}">${escapeHtml(message)}</div>
-      <div class="notification-item-time">${formatDateTime(item.createdAt)} РњРЎРљ</div>
+      <div class="notification-item-time">${formatDateTime(item.createdAt)} МСК</div>
     </button>
   `;
 }
@@ -2091,11 +2091,11 @@ async function initNotificationsPage() {
 
       recentList.innerHTML = recent.length
         ? recent.map(notificationsPageItemTemplate).join("")
-        : '<p class="empty-message compact-empty">Р—Р° РїРѕСЃР»РµРґРЅРёРµ 3 РґРЅСЏ СѓРІРµРґРѕРјР»РµРЅРёР№ РЅРµС‚.</p>';
+        : '<p class="empty-message compact-empty">За последние 3 дня уведомлений нет.</p>';
 
       archiveList.innerHTML = archive.length
         ? archive.map(notificationsPageItemTemplate).join("")
-        : '<p class="empty-message compact-empty">РђСЂС…РёРІ СѓРІРµРґРѕРјР»РµРЅРёР№ РїРѕРєР° РїСѓСЃС‚.</p>';
+        : '<p class="empty-message compact-empty">Архив уведомлений пока пуст.</p>';
     } catch (error) {
       const message = `<p class="empty-message">${escapeHtml(error.message)}</p>`;
       recentList.innerHTML = message;
@@ -2601,7 +2601,7 @@ async function bootstrap() {
 
   const authFailed = new URLSearchParams(window.location.search).get("auth") === "failed";
   if (authFailed) {
-    appAlert("РќРµ СѓРґР°Р»РѕСЃСЊ РІС‹РїРѕР»РЅРёС‚СЊ РІС…РѕРґ С‡РµСЂРµР· Discord. РџРѕРїСЂРѕР±СѓР№С‚Рµ СЃРЅРѕРІР°.");
+    appAlert("Не удалось выполнить вход через Discord. Попробуйте снова.");
   }
 
   const startNotificationsLoad = () => {
@@ -2620,7 +2620,7 @@ async function bootstrap() {
   };
 
   if (!state.currentUser) {
-    showAuthRequired("Р’С…РѕРґ Рё СЂРµРіРёСЃС‚СЂР°С†РёСЏ С‡РµСЂРµР· Discord.");
+    showAuthRequired("Вход и регистрация через Discord.");
     startNotificationsLoad();
     return;
   }
@@ -2679,7 +2679,7 @@ async function bootstrap() {
 function startBootstrap() {
   bootstrap().catch((error) => {
     console.error("Bootstrap failed", error);
-    appAlert("РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё РїСЂРёР»РѕР¶РµРЅРёСЏ.");
+    appAlert("Ошибка загрузки приложения.");
   });
 }
 
