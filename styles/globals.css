@@ -2061,6 +2061,13 @@ body {
   color: #bbcae0;
 }
 
+.admin-member-roles {
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .admin-member-detail {
   border: 1px solid #233752;
   background: linear-gradient(180deg, #101a29 0%, #0d1521 100%);
@@ -2141,53 +2148,71 @@ body {
 }
 
 .admin-detail-controls {
-  display: grid;
-  grid-template-columns: minmax(190px, 1fr) auto auto;
-  gap: 0.6rem;
+  display: flex;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
 }
 
-.admin-detail-select {
+.admin-role-picker {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.admin-role-option {
+  border: 1px solid #274061;
+  background: #101b2a;
+  border-radius: 11px;
+  padding: 0.58rem 0.62rem;
+  cursor: pointer;
+  user-select: none;
+  display: block;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+.admin-role-option:hover {
+  border-color: #3d6493;
+  background: #122238;
+}
+
+.admin-role-option.active {
+  border-color: #4f8ef7;
+  background: #14263f;
+}
+
+.admin-role-option.locked {
+  opacity: 0.88;
+  cursor: default;
+}
+
+.admin-role-option.locked:hover {
+  border-color: #274061;
+  background: #101b2a;
+}
+
+.admin-role-checkbox {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.admin-role-option-content {
+  display: flex;
+  align-items: center;
+  gap: 0.44rem;
   min-width: 0;
 }
 
-.admin-detail-select:disabled {
-  opacity: 0.55;
+.admin-role-option-content .role-chip {
+  margin-right: 0;
 }
 
-.admin-quick-roles {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.52rem;
-}
-
-.admin-quick-role-btn {
-  border: 1px solid #274161;
-  background: #121f31;
-  color: #d8e4f6;
-  border-radius: 10px;
-  padding: 0.55rem 0.42rem;
-  font-size: 0.8rem;
-  line-height: 1.15;
-  font-weight: 700;
-  cursor: pointer;
-  transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
-}
-
-.admin-quick-role-btn:hover:enabled {
-  border-color: #4e82cd;
-  background: #172c47;
-}
-
-.admin-quick-role-btn.active {
-  border-color: #5ca0ff;
-  background: #1a3458;
-  color: #f4f8ff;
-}
-
-.admin-quick-role-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.admin-role-option-content small {
+  color: #8fa5c3;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .admin-detail-actions {
@@ -2272,13 +2297,17 @@ body {
     gap: 0.4rem;
   }
 
-  .admin-detail-grid,
-  .admin-detail-controls {
+  .admin-detail-grid {
     grid-template-columns: 1fr;
   }
 
-  .admin-quick-roles {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .admin-role-picker {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-detail-controls {
+    display: grid;
+    grid-template-columns: 1fr;
   }
 
   .admin-detail-actions .view-profile-btn {

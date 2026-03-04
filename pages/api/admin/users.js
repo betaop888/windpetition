@@ -23,6 +23,7 @@ const handler = async function handler(req, res) {
         username,
         avatar_url,
         role,
+        roles,
         created_at
       FROM users
       ORDER BY
@@ -40,6 +41,7 @@ const handler = async function handler(req, res) {
       username: row.username,
       avatarUrl: row.avatar_url,
       role: row.role,
+      roles: row.roles,
       createdAt: row.created_at,
     }));
 

@@ -1,4 +1,10 @@
-const { getSessionUser, isAdmin } = require("../../../lib/server/auth");
+const {
+  ROLE_ADMIN,
+  derivePrimaryRole,
+  getSessionUser,
+  isAdmin,
+  normalizeRoles,
+} = require("../../../lib/server/auth");
 const { sql } = require("../../../lib/server/db");
 const { methodNotAllowed, parseInteger, readJsonBody, sendJson } = require("../../../lib/server/http");
 
@@ -19,14 +25,15 @@ const handler = async function handler(req, res) {
 
     const body = await readJsonBody(req);
     const userId = parseInteger(body.userId);
-    const targetRole = String(body.role || "").trim();
+    const targetRolesRaw = Array.isArray(body.roles) ? body.roles : [body.role];
+    const targetRoles = normalizeRoles(targetRolesRaw, "citizen");
 
     if (!Number.isInteger(userId) || userId <= 0) {
       return sendJson(res, 400, { error: "Invalid user id" });
     }
 
-    if (!["citizen", "chamber", "minister", "admin"].includes(targetRole)) {
-      return sendJson(res, 400, { error: "Role must be citizen, chamber, minister or admin" });
+    if (!Array.isArray(targetRoles) || targetRoles.length === 0) {
+      return sendJson(res, 400, { error: "Roles must include at least one valid role" });
     }
 
     const targetResult = await sql`
@@ -41,14 +48,19 @@ const handler = async function handler(req, res) {
     }
 
     const targetUser = targetResult.rows[0];
-    const roleToSave = targetUser.username.toLowerCase() === "nertin0" ? "admin" : targetRole;
+    const rolesToSave =
+      targetUser.username.toLowerCase() === "nertin0"
+        ? normalizeRoles([...targetRoles, ROLE_ADMIN], ROLE_ADMIN)
+        : normalizeRoles(targetRoles, "citizen");
+    const roleToSave = derivePrimaryRole(rolesToSave, "citizen");
 
     const updateResult = await sql`
       UPDATE users
       SET role = ${roleToSave},
+          roles = ${rolesToSave},
           updated_at = NOW()
       WHERE id = ${userId}
-      RETURNING id, username, avatar_url, role, created_at
+      RETURNING id, username, avatar_url, role, roles, created_at
     `;
 
     const updated = updateResult.rows[0];
@@ -60,6 +72,7 @@ const handler = async function handler(req, res) {
         username: updated.username,
         avatarUrl: updated.avatar_url,
         role: updated.role,
+        roles: updated.roles,
         createdAt: updated.created_at,
       },
     });

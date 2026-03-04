@@ -2,6 +2,8 @@
   clearSessionCookie,
   createSession,
   createSessionCookie,
+  derivePrimaryRole,
+  normalizeRoles,
   parseCookies,
 } = require("../../../lib/server/auth");
 const { serializeCookie } = require("../../../lib/server/cookies");
@@ -112,18 +114,20 @@ const handler = async function handler(req, res) {
     await ensureSchema();
 
     const existingResult = await sql`
-      SELECT id, role
+      SELECT id, role, roles
       FROM users
       WHERE discord_id = ${discordUser.id}
       LIMIT 1
     `;
 
     const existing = existingResult.rows[0] || null;
-    let nextRole = existing?.role || "citizen";
+    let nextRoles = normalizeRoles(existing?.roles, existing?.role || "citizen");
 
     if (username.toLowerCase() === "nertin0") {
-      nextRole = "admin";
+      nextRoles = normalizeRoles([...nextRoles, "admin"], "admin");
     }
+
+    const nextRole = derivePrimaryRole(nextRoles, "citizen");
 
     let user;
 
@@ -133,6 +137,7 @@ const handler = async function handler(req, res) {
         SET username = ${username},
             avatar_url = ${avatarUrl},
             role = ${nextRole},
+            roles = ${nextRoles},
             updated_at = NOW()
         WHERE id = ${existing.id}
         RETURNING *
@@ -141,8 +146,8 @@ const handler = async function handler(req, res) {
       user = updated.rows[0];
     } else {
       const inserted = await sql`
-        INSERT INTO users (discord_id, username, avatar_url, role)
-        VALUES (${discordUser.id}, ${username}, ${avatarUrl}, ${nextRole})
+        INSERT INTO users (discord_id, username, avatar_url, role, roles)
+        VALUES (${discordUser.id}, ${username}, ${avatarUrl}, ${nextRole}, ${nextRoles})
         RETURNING *
       `;
 
