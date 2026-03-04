@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wind Petition - Главная</title>
+  <title>Wind Petition - О проекте</title>
   <link rel="stylesheet" href="styles.css">
 </head>
-<body data-page="home">
+<body data-page="about">
   <nav class="navbar">
     <div class="nav-container">
       <div class="nav-logo">
@@ -15,11 +15,11 @@
         </svg>
       </div>
       <div class="nav-links">
-        <a href="/" class="nav-link active">Главная</a>
+        <a href="/" class="nav-link">Главная</a>
         <a href="/minister" class="nav-link" id="ministerNavLink" style="display: none;">Голосования министров</a>
         <a href="/registry" class="nav-link">Реестр</a>
         <a href="/admin" class="nav-link" id="adminNavLink" style="display: none;">Админка</a>
-        <a href="#petitions" class="nav-link">Голосования</a>
+        <a href="/#petitions" class="nav-link">Голосования</a>
       </div>
       <div class="nav-user">
         <button class="notification-btn" type="button" aria-label="Уведомления">
@@ -53,48 +53,22 @@
   </nav>
 
   <main class="main-content">
-    <section class="hero-section">
-      <div class="hero-content">
-        <h1 class="hero-title">Wind Petition</h1>
-        <p class="hero-description">
-          Платформа голосований по петициям и законопроектам.<br>
-          Авторизация, профиль, роли и голоса работают через Discord.
-        </p>
-        <div class="hero-stats">
-          <div class="hero-stat-item">
-            <span class="hero-stat-value" id="heroUsersCount">0+</span>
-            <span class="hero-stat-label">зарегистрировано</span>
-          </div>
-          <div class="hero-stat-item">
-            <span class="hero-stat-value" id="heroProposalsCount">0</span>
-            <span class="hero-stat-label">голосований создано</span>
-          </div>
-        </div>
-        <div class="hero-buttons">
-          <button class="btn btn-primary" id="heroProfileBtn">Открыть профиль</button>
-          <a class="btn btn-secondary" href="/about">Подробнее</a>
-        </div>
-      </div>
-      <div class="hero-image">
-        <div class="hero-gradient"></div>
-      </div>
-    </section>
-
-    <section class="petitions-section" id="petitions">
+    <section class="petitions-section">
       <div class="section-header">
         <div>
-          <h2 class="section-title">Публичные голосования <span class="count" id="petitionsCount">0</span></h2>
-          <div class="tabs">
-            <button class="tab active" data-filter="all" type="button">Все</button>
-            <button class="tab" data-filter="my" type="button">Мои</button>
-          </div>
+          <h2 class="section-title">О проекте</h2>
+          <p class="page-subtitle">Коротко о назначении платформы.</p>
         </div>
-        <button class="btn btn-primary" id="createPetitionBtn" type="button">Создать голосование</button>
       </div>
-      <div class="search-bar">
-        <input type="text" placeholder="Поиск по заголовку или описанию" id="searchInput">
+
+      <article class="petition-card">
+        <h3 class="petition-card-title">Wind Petition</h3>
+        <p class="petition-card-description">Сайт разработан для ванильного сервера windmc для парламента. Здесь можно подавать законопроекты и петиции. Участники обсуждают инициативы. Участники голосуют за решения. Все материалы хранятся в одном месте для удобной работы парламента.</p>
+      </article>
+
+      <div class="form-actions">
+        <a class="btn btn-secondary" href="/">Вернуться на главную</a>
       </div>
-      <div class="petitions-grid" id="petitionsGrid"></div>
     </section>
   </main>
 
@@ -109,4 +83,3 @@
   <script src="app.js"></script>
 </body>
 </html>
-
