@@ -2369,8 +2369,108 @@ body {
   overflow-wrap: anywhere;
   word-break: break-word;
 }
+
+.about-section {
+  max-width: 1220px;
+}
+
+.about-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.about-lead {
+  line-height: 1.75;
+  color: #d5deed;
+  font-size: 1rem;
+}
+
+.about-points {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.about-point {
+  border: 1px solid #243952;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #0f1a29 0%, #0c1623 100%);
+  padding: 0.85rem;
+}
+
+.about-point h4 {
+  font-size: 0.95rem;
+  margin-bottom: 0.38rem;
+}
+
+.about-point p {
+  color: #acbbd0;
+  line-height: 1.58;
+  font-size: 0.9rem;
+}
+
+.about-faq {
+  display: flex;
+  flex-direction: column;
+  gap: 0.56rem;
+}
+
+.about-faq-item {
+  border: 1px solid #253a54;
+  border-radius: 10px;
+  background: #101a29;
+  padding: 0.6rem 0.74rem;
+}
+
+.about-faq-item summary {
+  cursor: pointer;
+  font-weight: 600;
+  list-style: none;
+  color: #ebf2ff;
+}
+
+.about-faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.about-faq-item summary::after {
+  content: "+";
+  float: right;
+  color: #87b6fa;
+}
+
+.about-faq-item[open] summary::after {
+  content: "-";
+}
+
+.about-faq-item p {
+  margin-top: 0.58rem;
+  color: #acbbd0;
+  line-height: 1.62;
+  font-size: 0.91rem;
+}
+
+.about-actions {
+  margin-top: 1.2rem;
+}
+
 @media (max-width: 1024px) {
+  .about-points {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .notifications-page-groups {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .about-points {
+    grid-template-columns: 1fr;
+  }
+
+  .about-actions .btn {
+    width: 100%;
   }
 }
